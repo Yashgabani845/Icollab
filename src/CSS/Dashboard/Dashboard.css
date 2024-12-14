@@ -1,0 +1,49 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .dashboard {
+    display: flex;
+    height: 100vh;
+    background-color: #3f0e40;
+
+  }
+  .sidebarselect{
+    display: flex;
+    flex-direction: column;
+    width: 150px;
+    height: 100%;
+  }
+  .sidebarselect div{
+    height: 150px;
+  }
+
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .message-section {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background-color: #f4f4f4;
+  }
+  
+  .message-input {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+    background-color: white;
+  }
+  
