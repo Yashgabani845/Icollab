@@ -1,5 +1,5 @@
 import React from 'react';
-import '../CSS/frontview.css';
+import "../../CSS/Homepage/frontview.css"
 
 const FrontView = () => {
   return (
