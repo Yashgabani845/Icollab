@@ -1,12 +1,12 @@
-import React from 'react';
-import "../../CSS/Homepage/navbar.css"
-
+  import React from 'react';
+import "../../CSS/Homepage/navbar.css";
+import logo from "../../Images/logo.jpg";
 const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-content">
         <div className="navbar-left">
-          <img src="https://cdn.jsdelivr.net/gh/slack-clone/slack-image/slack-logo.png" alt="Slack Logo" className="logo" />
+          <img src={logo} className='logo'   />
           <ul className="navbar-menu">
             <li><a href="#">Features</a></li>
             <li><a href="#">Solutions</a></li>

@@ -1,91 +1,116 @@
-/* navbar.css */
-
-.navbar {
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .navbar {
+    background-color: #ffffff; /* White background */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    position: sticky;
+    top: 0;
+    z-index: 1000; /* Ensure it's above other content */
+    padding: 0.5rem 2rem;
+  }
+  
+  .navbar-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #ddd;
-}
-
-.navbar-logo img {
-    height: 40px;
-}
-
-.navbar-links {
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.navbar-links li {
-    margin: 0 15px;
-    cursor: pointer;
-    position: relative;
-}
-
-.dropdown:hover .dropdown-menu {
-    display: block;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: white;
-    border: 1px solid #ddd;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    list-style: none;
-    padding: 10px 0;
-}
-
-.dropdown-menu li {
-    padding: 8px 20px;
-    cursor: pointer;
-}
-
-.dropdown-menu li:hover {
-    background-color: #f0f0f0;
-}
-
-.navbar-actions {
+  }
+  
+  .navbar-left {
     display: flex;
     align-items: center;
-}
-
-.get-started {
-    background-color: #007bff;
-    color: white;
+  }
+  
+  .logo {
+    height: 80px;
+    width: 130px;
+    margin-right: 2rem;
+    cursor: pointer;
+  }
+  
+  .navbar-menu {
+    list-style: none;
+    display: flex;
+    gap: 2rem; 
+  }
+  
+  .navbar-menu li a {
+    text-decoration: none;
+    color: #333; 
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  
+  .navbar-menu li a:hover {
+    color: #4e9ff5; /* Highlight color */
+  }
+  
+  .navbar-right {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .talk-to-sales-btn,
+  .get-started-btn {
     border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
-    margin-right: 10px;
-}
-
-.get-started:hover {
-    background-color: #0056b3;
-}
-
-.signin {
-    background-color: transparent;
-    color: #007bff;
-    border: 1px solid #007bff;
-    padding: 8px 16px;
     border-radius: 4px;
-    cursor: pointer;
-    margin-right: 10px;
-}
-
-.signin:hover {
-    background-color: #e6f0ff;
-}
-
-.search-bar {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
+    transition: all 0.3s ease;
+  }
+  
+  .talk-to-sales-btn {
+    background: transparent;
+    color: #4e9ff5; /* Highlight color */
+    border: 2px solid #4e9ff5;
+  }
+  
+  .talk-to-sales-btn:hover {
+    background-color: #4e9ff5;
+    color: white;
+  }
+  
+  .get-started-btn {
+    background-color: #4e9ff5;
+    color: white;
+  }
+  
+  .get-started-btn:hover {
+    background-color: #357dc4; /* Slightly darker blue on hover */
+  }
+  
+  /* Responsive Design */
+  @media screen and (max-width: 768px) {
+    .navbar-content {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .navbar-menu {
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+  
+    .navbar-right {
+      flex-direction: column;
+      margin-top: 1rem;
+      width: 100%;
+      gap: 0.5rem;
+    }
+  
+    .talk-to-sales-btn,
+    .get-started-btn {
+      width: 100%;
+      text-align: center;
+    }
+  }
+  

@@ -13,8 +13,8 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
-      <Sidebar onIconClick={handleIconClick} />
-      <SidebarView selectedView={selectedView} />
+      {/* <Sidebar onIconClick={handleIconClick} />
+      <SidebarView selectedView={selectedView} /> */}
     </div>
   );
 };

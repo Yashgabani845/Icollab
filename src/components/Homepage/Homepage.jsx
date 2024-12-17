@@ -1,11 +1,8 @@
 import React from "react";
-import Navbar from "./Navbar";
-import Frontview from "./FrontView";
-import Footer from "./Footer";
 import "../../CSS/Homepage/homepage.css"
-
+import InputBox from "../Dashboard/InputBox";
 const Homepage = ()=>{
     
-   return( <><Navbar /><Frontview /></>)
+   return( <InputBox/>);
 }
 export default Homepage;
