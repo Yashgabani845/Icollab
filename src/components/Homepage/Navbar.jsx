@@ -1,26 +1,26 @@
-  import React from 'react';
+import React from "react";
 import "../../CSS/Homepage/navbar.css";
-import logo from "../../Images/logo.jpg";
+import logo from '../../Images/logo.png';
+
 const Navbar = () => {
   return (
-    <nav className="navbar">
-      <div className="navbar-content">
-        <div className="navbar-left">
-          <img src={logo} className='logo'   />
-          <ul className="navbar-menu">
-            <li><a href="#">Features</a></li>
-            <li><a href="#">Solutions</a></li>
-            <li><a href="#">Enterprise</a></li>
-            <li><a href="#">Resources</a></li>
-            <li><a href="#">Pricing</a></li>
+    <header className="navbar">
+      <div className="container">
+      <img src={logo} alt="Logo" />
+      <nav className="nav-links">
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <button className="workspace">Create a New Workspace</button>
+
           </ul>
-        </div>
-        <div className="navbar-right">
-          <button className="talk-to-sales-btn">TALK TO SALES</button>
-          <button className="get-started-btn">GET STARTED</button>
+        </nav>
+        <div className="auth-buttons">
+          <button className="login-btn">Log In</button>
+          <button className="signup-btn">Sign Up</button>
         </div>
       </div>
-    </nav>
+    </header>
   );
 };
 
