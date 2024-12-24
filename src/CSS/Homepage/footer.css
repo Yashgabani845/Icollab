@@ -2,13 +2,91 @@
   background-color: #4a154b;
   color: white;
   text-align: center;
-  padding: 2rem 0;
+  padding: 4rem 2rem;
   font-size: 1rem;
   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.footer p {
-  margin: 0;
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.footer-logo {
+  flex: 1;
+  min-width: 250px;
+}
+
+.footer-logo h2 {
+  font-size: 2.5rem;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.footer-logo p {
+  font-size: 1.1rem;
+  color: #ccc;
+}
+
+.footer-links {
+  flex: 1;
+  min-width: 250px;
+}
+
+.footer-links h3 {
+  font-size: 1.5rem;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.footer-links ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links ul li {
+  margin: 0.5rem 0;
+}
+
+.footer-links ul li a {
+  color: #ccc;
+  text-decoration: none;
+}
+
+.footer-links ul li a:hover {
+  color: white;
+}
+
+.footer-social {
+  flex: 1;
+  min-width: 250px;
+}
+
+.footer-social h3 {
+  font-size: 1.5rem;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.social-icons a {
+  color: #ccc;
+  margin: 0 1rem;
+  transition: color 0.3s;
+}
+
+.social-icons a:hover {
+  color: white;
+}
+
+.footer-bottom {
+  padding-top: 1.5rem;
+  border-top: 1px solid #ccc;
+}
+
+.footer-bottom p {
   font-size: 1rem;
   color: #ccc;
 }

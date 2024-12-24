@@ -1,0 +1,35 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid #532753;
+  background-color: #4a154b;
+}
+
+.search-bar {
+  width: 300px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.header-tabs button {
+  background-color: #3f0e40;
+  border: none;
+  color: #fff;
+  padding: 10px 15px;
+  margin: 0 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.header-tabs button:hover {
+  background-color: #532753;
+}
+
+.options {
+  cursor: pointer;
+  font-size: 20px;
+}

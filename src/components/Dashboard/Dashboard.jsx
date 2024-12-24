@@ -1,20 +1,20 @@
-// Dashboard.js
-import React, { useState } from "react";
-import Sidebar from "./Sidebar";
-import SidebarView from "./SidebarView";
-import "../../CSS/Dashboard/Dashboard.css";
+import React from 'react';
+import '../../CSS/Dashboard/Dashboard.css';
+import Sidebar from './Sidebar';
+import Header from './Header';
+import MessageSection from './MessageSection';
+import MessageInput from './MessageInput';
+import InputBox from './Canvaspage';
 
 const Dashboard = () => {
-  const [selectedView, setSelectedView] = useState("home");
-
-  const handleIconClick = (view) => {
-    setSelectedView(view);
-  };
-
   return (
     <div className="dashboard">
-      {/* <Sidebar onIconClick={handleIconClick} />
-      <SidebarView selectedView={selectedView} /> */}
+      <Sidebar />
+      <div className="main-content">
+        <Header />
+        <MessageSection />
+        <MessageInput />
+      </div>
     </div>
   );
 };

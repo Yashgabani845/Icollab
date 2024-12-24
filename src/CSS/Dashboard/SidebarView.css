@@ -1,12 +1,11 @@
-/* SidebarView.css */
 .sidebar-view {
-    flex: 1;
-    padding: 20px;
-    background-color: #f4f4f4;
-  }
-  
-  h2 {
-    color: #333;
-    font-size: 24px;
-  }
-  
+  flex: 1;
+  padding: 20px;
+  background-color: #f8f8f8;
+  color: #333;
+}
+
+h2 {
+  font-size: 24px;
+  color: #4a154b;
+}

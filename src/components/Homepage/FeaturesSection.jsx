@@ -1,6 +1,6 @@
 import React from "react";
 import "../../CSS/Homepage/features.css";
-import logo from '../../Images/logo.jpg';  // Importing the image
+import logo from '../../Images/logo.jpg';
 
 const FeaturesSection = () => {
   return (
@@ -25,6 +25,24 @@ const FeaturesSection = () => {
 
             <h3>Integrations</h3>
             <p>Connect your favorite tools like GitHub and Google Drive.</p>
+          </div>
+          <div className="feature-card">
+          <img src={logo} alt="Logo" />
+
+            <h3>Channels</h3>
+            <p>Organize conversations by topics, projects, or teams.</p>
+          </div>
+          <div className="feature-card">
+          <img src={logo} alt="Logo" />
+
+            <h3>Channels</h3>
+            <p>Organize conversations by topics, projects, or teams.</p>
+          </div>
+          <div className="feature-card">
+          <img src={logo} alt="Logo" />
+
+            <h3>Channels</h3>
+            <p>Organize conversations by topics, projects, or teams.</p>
           </div>
         </div>
       </div>
