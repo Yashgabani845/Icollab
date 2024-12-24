@@ -5,7 +5,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .navbar .container {
@@ -13,44 +12,51 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+  flex-wrap: nowrap; /* Prevent wrapping */
 }
 
-.navbar img {
-  width: 40px;
-  height: auto;
+.logo {
+  height: 40px;
+  margin-right: 1rem;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  flex-grow: 1; /* Ensures this section takes up space to align other items */
 }
 
 .nav-links ul {
   list-style: none;
   display: flex;
-  gap: 1.5rem;
+  gap: 1.5rem; /* Increased gap for better spacing */
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links ul li {
   margin: 0;
 }
 
-.nav-links a {
+.nav-links ul a {
   color: white;
   text-decoration: none;
   font-size: 1rem;
-  transition: color 0.3s;
 }
 
-.nav-links a:hover {
-  color: #ddd;
-}
-
-.nav-links .workspace
-{
+.workspace {
   background-color: white;
   color: #4a154b;
+  padding: 0.5rem 1rem;
   border: none;
-  padding: 0.7rem 1.5rem;
-  margin-left: 0.5rem;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s, color 0.3s;
+  margin-left: 2rem;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 1rem;
 }
 
 .auth-buttons .login-btn,
@@ -58,27 +64,29 @@
   background-color: white;
   color: #4a154b;
   border: none;
-  padding: 0.7rem 1.5rem;
-  margin-left: 0.5rem;
-  border-radius: 5px;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
   cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s, color 0.3s;
+  font-size: 1rem;
 }
 
 .auth-buttons .signup-btn {
-  background-color: #330b33;
+  background-color: #3f0e40;
   color: white;
 }
 
-.auth-buttons .signup-btn:hover {
-  background-color: #1c081c;
-}
+@media (max-width: 768px) {
+  .navbar .container {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 
-.auth-buttons .login-btn:hover {
-  background-color: #ddd;
-}
+  .nav-links ul {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
 
-.nav-links .workspace:hover {
-  background-color: #ddd;
+  .auth-buttons {
+    margin-top: 1rem;
+  }
 }
