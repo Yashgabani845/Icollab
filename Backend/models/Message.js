@@ -3,7 +3,7 @@ const MessageSchema = new mongoose.Schema({
     channel: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel' },
     content: { type: String, required: true },
     type: { type: String, enum: ['text', 'image', 'video', 'file'], default: 'text' },
-    attachments: [{ type: String }], // URLs to uploaded files
+    attachments: [{ type: String }], 
     createdAt: { type: Date, default: Date.now },
   }, { timestamps: true });
   

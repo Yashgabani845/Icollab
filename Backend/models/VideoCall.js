@@ -1,7 +1,7 @@
 const VideoCallSchema = new mongoose.Schema({
     host: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // List of participants
-    channel: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel' }, // Associated channel
+    participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], 
+    channel: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel' },
     startTime: { type: Date, default: Date.now },
     endTime: { type: Date },
     status: { type: String, enum: ['active', 'ended'], default: 'active' },
