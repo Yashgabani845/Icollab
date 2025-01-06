@@ -5,8 +5,6 @@ import SignupPage from "./components/Auth/Signuppage";
 import Homepage from "./components/Homepage/Homepage";
 import Dashboard from "./components/Dashboard/Dashboard";
 import CanvasPage from "./components/Dashboard/Canvaspage";
-
-
 const App = () => {
   return (
     <Router>
