@@ -3,8 +3,8 @@ const ChannelSchema = new mongoose.Schema({
     description: { type: String },
     isPrivate: { type: Boolean, default: false },
     workspace: { type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' },
-    members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Users in the channel
-    messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }], // Associated messages
+    members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], 
+    messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }],
   }, { timestamps: true });
   
   module.exports = mongoose.model('Channel', ChannelSchema);

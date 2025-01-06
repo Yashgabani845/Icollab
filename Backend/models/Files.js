@@ -4,7 +4,7 @@ const FileSchema = new mongoose.Schema({
     filename: { type: String },
     url: { type: String, required: true },
     type: { type: String, enum: ['image', 'video', 'document', 'other'], required: true },
-    size: { type: Number }, // File size in bytes
+    size: { type: Number }, 
     uploadedAt: { type: Date, default: Date.now },
   });
   
