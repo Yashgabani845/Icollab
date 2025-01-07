@@ -10,7 +10,7 @@ const LoginPage = () => {
   const handleGoogleLogin = () => {
     console.log("Google Signup triggered");
   };
-
+const navigate = useNavigate();
   const handleLogin = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/login", {
@@ -27,7 +27,8 @@ const LoginPage = () => {
         console.log("Login successful:", data);
 
         localStorage.setItem("authToken", data.token);
-        redirect();
+        localStorage.setItem("email",email);
+        navigate('/');
         alert("Login successful!");
       } else {
         console.error("Error:", data.message);
@@ -48,7 +49,7 @@ const LoginPage = () => {
           </div>
 
           <h1>Log in to your Account</h1>
-          <p className="welcome-text">Welcome back! Select method to log in:</p>
+          <p className="welcome-text">Welcome back!  Select method to log in:</p>
 
           <div className="social-buttons">
             <button className="social-btn google" onClick={handleGoogleLogin}>
