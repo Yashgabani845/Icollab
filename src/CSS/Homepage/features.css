@@ -1,4 +1,4 @@
-.features { 
+.features {
   background-color: #ffffff;
   padding: 3rem 0;
   text-align: center;
@@ -10,38 +10,34 @@
   margin-bottom: 2rem;
 }
 
-.feature-cards {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+.swiper {
+  padding: 2rem 0;
 }
 
 .feature-card {
-  background-color: #f4f4f4;
+  background-color: #ffffff; /* Clean white background */
+  border: 1px solid #e0e0e0; /* Light gray border */
+  border-radius: 16px; /* Rounded corners */
   padding: 1.5rem;
-  border-radius: 12px;
-  width: 300px;
   text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Subtle shadow for elegance */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .feature-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+  transform: translateY(-8px); /* Smooth lift on hover */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow */
 }
 
 .feature-card img {
-  width: 60px;
-  height: 60px;
+  width: 190px;
+  height: 145px;
   margin-bottom: 1rem;
+  border-radius: 15px;
 }
 
 .feature-card h3 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: #333;
   margin-bottom: 0.5rem;
 }
@@ -49,4 +45,23 @@
 .feature-card p {
   color: #555;
   line-height: 1.6;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: #4a154b;
+}
+
+.swiper-pagination-bullet {
+  background: #cccccc;
+  opacity: 0.8;
+}
+
+.swiper-pagination-bullet-active {
+  background: #4a154b;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
 }
