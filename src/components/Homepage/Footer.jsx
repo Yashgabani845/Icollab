@@ -1,17 +1,19 @@
 import React from "react";
 import "../../CSS/Homepage/footer.css";
-import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram } from 'react-icons/fa';
+import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
 
 const Footer = () => {
   return (
     <footer className="footer">
       <div className="container">
         <div className="footer-content">
-          {/* <div className="footer-logo">
+          {/* Footer Branding */}
+          <div className="footer-brand">
             <h2>Icollab</h2>
-            <p>Your collaboration platform for teams and organizations.</p>
-          </div> */}
-          
+            <p>Your one-stop collaboration platform for teams and organizations.</p>
+          </div>
+
+          {/* Quick Links */}
           <div className="footer-links">
             <h3>Quick Links</h3>
             <ul>
@@ -23,6 +25,25 @@ const Footer = () => {
             </ul>
           </div>
 
+          {/* Contact Information */}
+          <div className="footer-contact">
+            <h3>Contact Us</h3>
+            <p><FaMapMarkerAlt /> 123 Collaboration St, Suite 100, New York, NY</p>
+            <p><FaPhone /> +1 800 123 4567</p>
+            <p><FaEnvelope /> support@icollab.com</p>
+          </div>
+
+          {/* Newsletter Subscription */}
+          <div className="footer-newsletter">
+            <h3>Newsletter</h3>
+            <p>Subscribe to our newsletter to stay updated.</p>
+            <form>
+              <input type="email" placeholder="Enter your email" />
+              <button type="submit">Subscribe</button>
+            </form>
+          </div>
+
+          {/* Social Media Links */}
           <div className="footer-social">
             <h3>Follow Us</h3>
             <div className="social-icons">
@@ -41,9 +62,10 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        
+
+        {/* Footer Bottom */}
         <div className="footer-bottom">
-          <p>&copy; 2024 Icollab. All rights reserved.</p>
+          <p>&copy; 2024 Icollab. All rights reserved. | Terms & Conditions | Privacy Policy</p>
         </div>
       </div>
     </footer>
