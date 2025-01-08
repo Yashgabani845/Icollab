@@ -1,0 +1,116 @@
+/* Overall Section Styling */
+.pricing-section {
+    background-color: #f7f7f7; /* Soft, neutral background */
+    padding: 5rem 2rem;
+    text-align: center;
+    font-family: "Roboto", sans-serif; /* Clean font */
+  }
+  
+  /* Title Styling */
+  .pricing-title {
+    font-size: 3rem;
+    margin-bottom: 3rem;
+    color: #333;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  
+  /* Card Container */
+  .pricing-cards {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  /* Card Styling */
+  .pricing-card {
+    background: #fff;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    padding: 2.5rem;
+    width: 350px; /* Larger card */
+    text-align: center;
+    border: 2px solid #e4e4e4; /* Soft border */
+    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  }
+  
+  .pricing-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+    border-color: #d6d6d6;
+  }
+  
+  /* Card Colors */
+  .free {
+    border-top: 6px solid #a6a6a6; /* Neutral gray */
+  }
+  
+  .premium {
+    border-top: 6px solid #7395ae; /* Muted blue */
+  }
+  
+  .advanced {
+    border-top: 6px solid #556b2f; /* Olive green */
+  }
+  
+  /* Card Title */
+  .pricing-card-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #444;
+    font-weight: 600;
+  }
+  
+  /* Card Price */
+  .pricing-price {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: #666;
+    font-weight: 500;
+  }
+  
+  /* Features List */
+  .pricing-features {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+  }
+  
+  .pricing-features li {
+    font-size: 1.1rem;
+    color: #555;
+    margin: 0.8rem 0;
+    font-weight: 400;
+  }
+  
+  /* Button Styling */
+  .pricing-button {
+    background: #7395ae; /* Muted blue */
+    color: white;
+    padding: 0.8rem 2rem;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: background-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .pricing-button:hover {
+    background-color: #556b2f; /* Olive green on hover */
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .pricing-cards {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .pricing-card {
+      width: 90%;
+    }
+  }
+  
