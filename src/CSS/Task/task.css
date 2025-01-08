@@ -1,0 +1,265 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+.rd-dashboard {
+  display: flex;
+  height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.rd-sidebar {
+  width: 280px;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  color: #333;
+  padding: 1.5rem;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.rd-sidebar-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.rd-menu-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.75rem;
+  color: #4a5568;
+}
+
+.rd-sidebar-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.rd-search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #f7fafc;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.rd-search-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #a0aec0;
+  margin-right: 0.5rem;
+}
+
+.rd-search-bar input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 0.875rem;
+  color: #4a5568;
+}
+
+.rd-search-bar input::placeholder {
+  color: #a0aec0;
+}
+
+.rd-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rd-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rd-nav-item:hover {
+  background-color: rgba(226, 232, 240, 0.6);
+}
+
+.rd-nav-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.75rem;
+  color: #4a5568;
+}
+
+.rd-nav-item span {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #2d3748;
+}
+
+/* Main Content Styles */
+.rd-main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-x: auto;
+}
+
+.rd-lists-container {
+  display: flex;
+  gap: 1.5rem;
+  min-height: 100%;
+  padding-bottom: 2rem;
+}
+
+.rd-list {
+  flex-shrink: 0;
+  width: 300px;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.rd-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.rd-list-header h3 {
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: #2d3748;
+}
+
+.rd-more-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+  color: #4a5568;
+}
+
+.rd-more-icon-small {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  color: #718096;
+}
+
+.rd-card {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 0.75rem;
+  cursor: move;
+  transition: all 0.2s ease;
+}
+
+.rd-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.rd-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.rd-card-header h4 {
+  font-weight: 500;
+  font-size: 1rem;
+  color: #2d3748;
+}
+
+.rd-card-description {
+  font-size: 0.875rem;
+  color: #718096;
+  margin-top: 0.75rem;
+}
+
+.rd-add-card-btn, .rd-add-list-btn {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem;
+  color: #4a5568;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  background-color: rgba(226, 232, 240, 0.6);
+  border: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9375rem;
+}
+
+.rd-add-card-btn:hover, .rd-add-list-btn:hover {
+  background-color: rgba(203, 213, 224, 0.8);
+}
+
+.rd-add-list-btn {
+  width: 300px;
+  height: fit-content;
+}
+
+.rd-plus-icon {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.5rem;
+}
+
+/* Scrollbar Styles */
+.rd-main-content::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.rd-main-content::-webkit-scrollbar-track {
+  background: rgba(226, 232, 240, 0.6);
+  border-radius: 10px;
+}
+
+.rd-main-content::-webkit-scrollbar-thumb {
+  background-color: rgba(160, 174, 192, 0.6);
+  border-radius: 10px;
+  border: 3px solid rgba(226, 232, 240, 0.6);
+}
+
+.rd-main-content::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(113, 128, 150, 0.8);
+}
+
+/* Drag and Drop Styles */
+.rd-card.dragging {
+  opacity: 0.5;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.rd-list.drag-over {
+  background-color: rgba(226, 232, 240, 0.8);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .rd-dashboard {
+    flex-direction: column;
+  }
+
+  .rd-sidebar {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .rd-main-content {
+    padding: 1rem;
+  }
+
+  .rd-list, .rd-add-list-btn {
+    width: 100%;
+  }
+}
+
