@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
+import { FaPhone, FaPhoneSlash, FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash } from 'react-icons/fa';
+
+import "../../CSS/videocall.css";
 
 const VideoCall = () => {
   const [userId, setUserId] = useState('');
@@ -8,6 +11,8 @@ const VideoCall = () => {
   const [isInCall, setIsInCall] = useState(false);
   const [incomingCall, setIncomingCall] = useState(null);
   const [currentCallId, setCurrentCallId] = useState(null);
+  const [isAudioMuted, setIsAudioMuted] = useState(false);
+  const [isVideoOff, setIsVideoOff] = useState(false);
 
   const socketRef = useRef(null);
   const peerConnectionRef = useRef(null);
@@ -34,14 +39,16 @@ const VideoCall = () => {
 
     socketRef.current.on('connect', () => {
       console.log('Connected with ID:', socketRef.current.id);
-      setUserId(socketRef.current.id);
+      const userEmail = localStorage.email;
+      socketRef.current.emit('register-email', userEmail);
     });
 
     socketRef.current.on('incoming-call', async ({ from, offer }) => {
-      console.log('Received call from:', from);
+      console.log('Incoming call from email:', from);
       setIncomingCall({ from, offer });
       setCurrentCallId(from);
     });
+    
 
     socketRef.current.on('call-accepted', async (answer) => {
       console.log('Call accepted, setting remote description');
@@ -81,7 +88,6 @@ const VideoCall = () => {
     const pc = new RTCPeerConnection(iceServers);
     peerConnectionRef.current = pc;
 
-    // Handle ICE candidates
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         console.log('Sending ICE candidate to:', currentCallId);
@@ -92,7 +98,6 @@ const VideoCall = () => {
       }
     };
 
-    // Handle incoming tracks
     pc.ontrack = (event) => {
       console.log('Received remote track');
       if (remoteVideoRef.current && event.streams[0]) {
@@ -137,12 +142,10 @@ const VideoCall = () => {
       const stream = await startLocalStream();
       const pc = createPeerConnection();
 
-      // Add local tracks to peer connection
       stream.getTracks().forEach(track => {
         pc.addTrack(track, stream);
       });
 
-      // Create and send offer
       const offer = await pc.createOffer({
         offerToReceiveAudio: true,
         offerToReceiveVideo: true
@@ -151,7 +154,7 @@ const VideoCall = () => {
 
       console.log('Sending call offer to:', targetUserId);
       socketRef.current.emit('initiate-call', {
-        to: targetUserId,
+        toEmail: targetUserId, 
         offer: pc.localDescription
       });
     } catch (error) {
@@ -168,15 +171,12 @@ const VideoCall = () => {
       const stream = await startLocalStream();
       const pc = createPeerConnection();
 
-      // Add local tracks
       stream.getTracks().forEach(track => {
         pc.addTrack(track, stream);
       });
 
-      // Set remote description (offer)
       await pc.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
 
-      // Create and send answer
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
 
@@ -204,6 +204,8 @@ const VideoCall = () => {
     setIsInCall(false);
     setIncomingCall(null);
     setCurrentCallId(null);
+    setIsAudioMuted(false);
+    setIsVideoOff(false);
     if (localVideoRef.current) localVideoRef.current.srcObject = null;
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
   };
@@ -213,75 +215,91 @@ const VideoCall = () => {
     cleanupCall();
   };
 
+  const toggleAudio = () => {
+    if (localStream) {
+      localStream.getAudioTracks().forEach(track => {
+        track.enabled = !track.enabled;
+      });
+      setIsAudioMuted(!isAudioMuted);
+    }
+  };
+
+  const toggleVideo = () => {
+    if (localStream) {
+      localStream.getVideoTracks().forEach(track => {
+        track.enabled = !track.enabled;
+      });
+      setIsVideoOff(!isVideoOff);
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center p-6 max-w-4xl mx-auto">
-      <div className="w-full mb-6">
-        <h2 className="text-xl mb-2">Your ID: {userId}</h2>
-        <div className="flex gap-4">
-          <input
-            type="text"
-            value={targetUserId}
-            onChange={(e) => setTargetUserId(e.target.value)}
-            placeholder="Enter user ID to call"
-            className="flex-1 p-2 border rounded"
-          />
-          <button
-            onClick={initiateCall}
-            disabled={isInCall}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
-          >
-            Call
-          </button>
-        </div>
+    <div className="video-call-container">
+      <h2 className="user-id">Your ID: {userId}</h2>
+      <div className="call-controls">
+      <input
+  type="text"
+  value={targetUserId}
+  onChange={(e) => setTargetUserId(e.target.value)}
+  placeholder="Enter email ID to call"
+  className="input-field"
+/>
+
+        <button
+          onClick={initiateCall}
+          disabled={isInCall}
+          className="btn btn-primary"
+        >
+          <FaPhone /> Call
+        </button>
       </div>
 
       {incomingCall && (
-        <div className="fixed top-4 right-4 bg-white p-4 rounded shadow-lg border">
+        <div className="incoming-call">
           <p>Incoming call from: {incomingCall.from}</p>
-          <div className="flex gap-2 mt-2">
-            <button
-              onClick={acceptCall}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              Accept
+          <div className="call-actions">
+            <button onClick={acceptCall} className="btn btn-primary">
+              <FaPhone /> Accept
             </button>
-            <button
-              onClick={() => setIncomingCall(null)}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Reject
+            <button onClick={() => setIncomingCall(null)} className="btn btn-danger">
+              <FaPhoneSlash /> Reject
             </button>
           </div>
         </div>
       )}
 
       {isInCall && (
-        <div className="w-full grid grid-cols-2 gap-4">
-          <div className="relative">
+        <div className="video-grid">
+          <div className="video-container">
             <video
               ref={localVideoRef}
               autoPlay
               muted
               playsInline
-              className="w-full h-64 bg-black rounded"
+              className="video"
             />
-            <p className="absolute top-2 left-2 text-white bg-black/50 px-2 rounded">Local</p>
+            <p className="video-label">Local</p>
           </div>
-          <div className="relative">
+          <div className="video-container">
             <video
               ref={remoteVideoRef}
               autoPlay
               playsInline
-              className="w-full h-64 bg-black rounded"
+              className="video"
             />
-            <p className="absolute top-2 left-2 text-white bg-black/50 px-2 rounded">Remote</p>
+            <p className="video-label">Remote</p>
           </div>
-          <button
-            onClick={endCall}
-            className="col-span-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            End Call
-          </button>
+          <div className="call-actions">
+            <button onClick={toggleAudio} className={`action-btn ${isAudioMuted ? 'active' : ''}`}>
+              {isAudioMuted ? <FaMicrophoneSlash /> : <FaMicrophone />}
+            </button>
+            <button onClick={toggleVideo} className={`action-btn ${isVideoOff ? 'active' : ''}`}>
+              {isVideoOff ? <FaVideoSlash /> : <FaVideo />}
+            </button>
+            <button onClick={endCall} className="action-btn end-call-btn">
+              <FaPhoneSlash />
+            </button>
+          </div>
         </div>
       )}
     </div>

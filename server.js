@@ -44,6 +44,7 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors());
+const emailToSocketMap = new Map();
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -55,13 +56,18 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
+  socket.on('register-email', (email) => {
+    emailToSocketMap.set(email, socket.id);
+    console.log(`Registered email: ${email} with socket ID: ${socket.id}`);
+  });
 
-  socket.on('initiate-call', ({ to, offer }) => {
-    console.log(`Call initiated from ${socket.id} to ${to}`);
-    socket.to(to).emit('incoming-call', {
-      from: socket.id,
-      offer
-    });
+  socket.on('initiate-call', ({ toEmail, offer }) => {
+    const targetSocketId = emailToSocketMap.get(toEmail);
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('incoming-call', { from: socket.id, offer });
+    } else {
+      socket.emit('user-not-found', { email: toEmail });
+    }
   });
 
   socket.on('accept-call', ({ to, answer }) => {
@@ -82,7 +88,13 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+    for (const [email, id] of emailToSocketMap.entries()) {
+      if (id === socket.id) {
+        emailToSocketMap.delete(email);
+        console.log(`User with email ${email} disconnected`);
+        break;
+      }
+    }
   });
 });
 
