@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const jwt = require("jsonwebtoken");
-
+const workspaceRoutes = require("./Routes/workspaceRoutes");
+const channelRoutes = require("./Routes/channelRoutes");
+const messageRoutes = require("./Routes/messageRoutes");
 require('dotenv').config(); // Load environment variables
 const User = require("./models/User")
 const URI = process.env.MONGO_URI || 'mongodb+srv://YashGabani:Yash9182@cluster0.n77u6.mongodb.net/Icollab?retryWrites=true&w=majority&appName=Cluster0';
@@ -24,7 +26,9 @@ const app = express();
 app.use(cors());
 
 app.use(express.json());
-
+app.use("/api/workspaces", workspaceRoutes);
+app.use("/api/channels", channelRoutes);
+app.use("/api/messages", messageRoutes);
 app.get('/', (req, res) => {
   res.send('MongoDB Atlas Connection Successful!');
 });

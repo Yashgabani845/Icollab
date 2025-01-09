@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const FileSchema = new mongoose.Schema({
     uploader: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     channel: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel' },
