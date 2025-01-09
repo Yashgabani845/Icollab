@@ -1,11 +1,10 @@
-const MessageSchema = new mongoose.Schema({
-    sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    channel: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel' },
-    content: { type: String, required: true },
-    type: { type: String, enum: ['text', 'image', 'video', 'file'], default: 'text' },
-    attachments: [{ type: String }], 
-    createdAt: { type: Date, default: Date.now },
-  }, { timestamps: true });
-  
-  module.exports = mongoose.model('Message', MessageSchema);
-  
+const mongoose = require('mongoose');
+
+const messageSchema = new mongoose.Schema({
+  content: { type: String, required: true },
+  sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  channel: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel', required: true },
+  createdAt: { type: Date, default: Date.now },
+});
+
+module.exports = mongoose.model('Message', messageSchema);
