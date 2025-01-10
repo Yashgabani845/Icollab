@@ -7,6 +7,8 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import CanvasPage from "./components/Dashboard/Canvaspage";
 import Pricing from "./components/Auth/Pricing";
 import Taskboard from "./components/Task/Taskboard";
+import VideoChat from "./components/VideoChat/Videochat";
+import VideoCall from "./components/VideoChat/VideoCall";
 const App = () => {
   return (
     <Router>
@@ -18,7 +20,8 @@ const App = () => {
         <Route path="/canvas" element={<CanvasPage />} />
         <Route path="/pricing" element={<Pricing/>}/>
         <Route path="/task" element={<Taskboard/>}/>
-
+        <Route path="/video" element={<VideoChat/>}/>
+        <Route path="/videocall" element={<VideoCall/>}/>
       </Routes>
     </Router>
   );

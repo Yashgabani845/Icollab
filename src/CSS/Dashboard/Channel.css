@@ -1,0 +1,32 @@
+.channel-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+  }
+  
+  .channel-input {
+    width: 80%;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .channel-button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .channel-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .channel-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+  }
+  

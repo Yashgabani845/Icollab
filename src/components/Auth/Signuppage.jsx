@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import google from "../../Images/google.png";
 import "../../CSS/Auth/Signuppage.css";
+import { auth, googleProvider } from '../../config/firebase/firebase';
+import { signInWithPopup } from 'firebase/auth';
+import { useNavigate } from "react-router-dom";
 
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,10 +16,56 @@ const SignupPage = () => {
     password: "",
     confirmPassword: "",
   });
+const navigate = useNavigate();
+ const handleGoogleSignup = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      // Send user data to your backend
+      const response = await fetch('http://localhost:5000/api/google-signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: user.email,
+          firstName: user.displayName?.split(' ')[0] || '',
+          lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
+          googleId: user.uid,
+          password: "google"
+        }),
+      });
 
-  const handleGoogleSignup = () => {
-    console.log("Google Signup triggered");
-  };
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('email', user.email);
+        navigate('/');
+        alert('Google signup successful!');
+      } else {
+        alert(`Error: ${data.message}`);
+      }
+    } catch (error) {
+      console.error('Error during Google signup:', error);
+      let errorMessage = 'Google signup failed. ';
+      
+      switch (error.code) {
+        case 'auth/configuration-not-found':
+          errorMessage += 'Firebase configuration error. Please contact support.';
+          break;
+        case 'auth/popup-blocked':
+          errorMessage += 'Popup was blocked. Please allow popups for this site.';
+          break;
+        case 'auth/popup-closed-by-user':
+          errorMessage += 'Sign-in popup was closed. Please try again.';
+          break;
+        default:
+          errorMessage += 'Please try again later.';
+      }
+      
+      alert(errorMessage);
+    }}
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

@@ -80,7 +80,7 @@ const VideoChat = () => {
 
     // Initialize Socket Connection
     useEffect(() => {
-        const socket = io('http://localhost:3000', { 
+        const socket = io('http://localhost:3001', { 
             transports: ['websocket'],
             forceNew: true 
         });

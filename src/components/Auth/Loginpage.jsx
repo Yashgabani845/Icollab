@@ -3,13 +3,44 @@ import "../../CSS/Auth/LonginPage.css";
 import google from "../../Images/google.png";
 import { redirect } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-
+import { auth, googleProvider } from '../../config/firebase/firebase';
+import { signInWithPopup } from 'firebase/auth';
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const handleGoogleLogin = () => {
-    console.log("Google Signup triggered");
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      // Verify with your backend
+      const response = await fetch('http://localhost:5000/api/google-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: user.email,
+          googleId: user.uid,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('email', user.email);
+        navigate('/');
+        alert('Google login successful!');
+      } else {
+        alert(`Error: ${data.message}`);
+      }
+    } catch (error) {
+      console.error('Error during Google login:', error);
+      alert('Google login failed. Please try again.');
+    }
   };
+
+  
 const navigate = useNavigate();
   const handleLogin = async () => {
     try {

@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const jwt = require("jsonwebtoken");
-
+const workspaceRoutes = require("./Routes/workspaceRoutes");
+const channelRoutes = require("./Routes/channelRoutes");
+const messageRoutes = require("./Routes/messageRoutes");
 require('dotenv').config(); // Load environment variables
 const User = require("./models/User")
 const URI = process.env.MONGO_URI || 'mongodb+srv://YashGabani:Yash9182@cluster0.n77u6.mongodb.net/Icollab?retryWrites=true&w=majority&appName=Cluster0';
@@ -24,7 +26,9 @@ const app = express();
 app.use(cors());
 
 app.use(express.json());
-
+app.use("/api/workspaces", workspaceRoutes);
+app.use("/api/channels", channelRoutes);
+app.use("/api/messages", messageRoutes);
 app.get('/', (req, res) => {
   res.send('MongoDB Atlas Connection Successful!');
 });
@@ -41,9 +45,13 @@ app.post('/api/signup', async (req, res) => {
         return res.status(400).json({ message: 'Email already exists' });
       }
   
-      const newUser = new User({ firstName, lastName, email, password });
+      const newUser = new User({ firstName, lastName, email, password, authType: 'local' });
       await newUser.save();
-  
+      const token = jwt.sign(
+        { id: newUser._id, email: newUser.email },
+        process.env.JWT_SECRET || "yash1234",
+        { expiresIn: "1h" }
+      );
       res.status(201).json({ message: 'User created successfully', user: newUser });
     } catch (error) {
       console.error('Error creating user:', error.message);
@@ -64,6 +72,12 @@ app.post('/api/signup', async (req, res) => {
       const user = await User.findOne({ email });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
+      }
+
+      if (user.authType !== 'local') {
+        return res.status(400).json({ 
+          message: "This email is registered with Google. Please use Google Sign In." 
+        });
       }
   
       // Check password
@@ -92,6 +106,109 @@ app.post('/api/signup', async (req, res) => {
     } catch (error) {
       console.error("Error during login:", error.message);
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post('/api/google-signup', async (req, res) => {
+    const { email, firstName, lastName, password,googleId } = req.body;
+  
+    try {
+      // Check if user exists
+      let user = await User.findOne({ email });
+  
+      if (user) {
+        // If user exists but with local auth, return error
+        if (user.authType === 'local') {
+          return res.status(400).json({ 
+            message: 'Email already exists with password login. Please use regular login.' 
+          });
+        }
+        // If Google user exists, just log them in
+        const token = jwt.sign(
+          { id: user._id, email: user.email },
+          process.env.JWT_SECRET || "yash1234",
+          { expiresIn: "1h" }
+        );
+        return res.json({ token, user });
+      }
+  
+      // Create new Google user
+      user = new User({
+        firstName,
+        lastName,
+        email,
+        password,
+        googleId,
+        authType: 'google'
+      });
+      await user.save();
+  
+      // Generate token
+      const token = jwt.sign(
+        { id: user._id, email: user.email },
+        process.env.JWT_SECRET || "yash1234",
+        { expiresIn: "1h" }
+      );
+  
+      res.status(201).json({
+        message: 'User created successfully',
+        
+        user: {
+          id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName
+        }
+      });
+    } catch (error) {
+      console.error('Error during Google signup:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  // Google login endpoint
+  app.post('/api/google-login', async (req, res) => {
+    const { email, googleId } = req.body;
+  
+    try {
+      const user = await User.findOne({ email });
+  
+      if (!user) {
+        return res.status(404).json({ 
+          message: 'User not found. Please sign up first.' 
+        });
+      }
+  
+      // Verify it's a Google auth user
+      if (user.authType !== 'google') {
+        return res.status(400).json({ 
+          message: 'This email is registered with password login. Please use regular login.' 
+        });
+      }
+  
+      // Verify Google ID
+      if (user.googleId !== googleId) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+  
+      const token = jwt.sign(
+        { id: user._id, email: user.email },
+        process.env.JWT_SECRET || "yash1234",
+        { expiresIn: "1h" }
+      );
+  
+      res.json({
+        token,
+        user: {
+          id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName
+        }
+      });
+    } catch (error) {
+      console.error('Error during Google login:', error);
+      res.status(500).json({ message: 'Server error' });
     }
   });
 const PORT = 5000;

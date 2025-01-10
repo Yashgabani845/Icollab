@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const VideoCallSchema = new mongoose.Schema({
     host: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], 
