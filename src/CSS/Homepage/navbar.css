@@ -169,8 +169,10 @@
 }
 
 .auth-buttons {
+  width: 200px;
   display: flex;
   gap: 0.5rem;
+
 }
 
 .login-btn, .signup-btn {
@@ -178,6 +180,7 @@
   border-radius: 4px;
   font-size: 1rem;
   font-weight: 500;
+  align-items: center;
   text-decoration: none;
   transition: all 0.3s ease;
 }
