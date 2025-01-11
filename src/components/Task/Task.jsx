@@ -10,13 +10,14 @@ const Task = ({ title, description, activityLog }) => {
     };
   
     return (
-      <div className={`task-container ${isExpanded ? "expanded" : "simple"}`}>
-        <div className="task-header">
-          <h3>Task Title</h3>
-          <button onClick={toggleMode}>
-            {isExpanded ? <X size={16} /> : <ChevronDown size={16} />}
-          </button>
-        </div>
+      <>{isExpanded && <div className="modal-overlay" onClick={toggleMode} />}
+        <div className={`task-container ${isExpanded ? "expanded" : "simple"}`}>
+          <div className="task-header">
+            <h3>{title}</h3>
+            <button onClick={toggleMode}>
+              {isExpanded ? <X size={16} /> : <ChevronDown size={16} />}
+            </button>
+          </div>
         {isExpanded && (
           <div className="task-details">
             <div className="general">
@@ -100,6 +101,7 @@ const Task = ({ title, description, activityLog }) => {
           </div>
         )}
       </div>
+      </>
     );
   };
   

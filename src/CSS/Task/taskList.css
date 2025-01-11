@@ -14,4 +14,108 @@
     flex-direction: column;
     gap: 16px;
   }
-  
+  /* Add Task Button */
+.add-task-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #4e9ff5;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.add-task-btn:hover {
+  background-color: #3a81c7;
+}
+
+/* Add Task Form */
+.add-task-form {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+input, textarea, select {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
+}
+
+input[type="text"], textarea {
+  height: 40px;
+}
+
+textarea {
+  height: 100px;
+}
+
+select {
+  height: 40px;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #4e9ff5;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.submit-btn {
+  background-color: #4e9ff5;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+  background-color: #3a81c7;
+}
+
+.cancel-btn {
+  padding: 10px 20px;
+  border: 1px solid #ccc;
+  background-color: white;
+  color: #333;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.submit-btn, .cancel-btn {
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}

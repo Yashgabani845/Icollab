@@ -1,6 +1,4 @@
-
-// Taskboard.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Menu,
   Plus,
@@ -16,99 +14,80 @@ import {
 import '../../CSS/Task/task.css';
 import TaskList from './TaskList';
 
-const initialData = {
-  lists: [
-    {
-      id: 'list-1',
-      title: 'To Do',
-      cards: [
-        { id: 'card-1', title: 'Create login page', description: 'Implement user authentication' },
-        { id: 'card-2', title: 'Design homepage', description: 'Create wireframes' },
-      ],
-    },
-    {
-      id: 'list-2',
-      title: 'In Progress',
-      cards: [
-        { id: 'card-3', title: 'API Integration', description: 'Connect backend APIs' },
-      ],
-    },
-    {
-      id: 'list-3',
-      title: 'Done',
-      cards: [
-        { id: 'card-4', title: 'Project Setup', description: 'Initial repository setup' },
-      ],
-    },
-  ],
-};
+// You can import a spinner component from a library or use your custom spinner
+import { Circles } from 'react-loader-spinner'; // If using react-loader-spinner
 
 const Taskboard = () => {
-  const [lists, setLists] = useState(initialData.lists);
-  const [draggedCard, setDraggedCard] = useState(null);
+  const [lists, setLists] = useState([]);
+  const [newListTitle, setNewListTitle] = useState('');
+  const [isAddingList, setIsAddingList] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Track loading state
 
-  const handleDragStart = (card, listId) => {
-    setDraggedCard({ card, sourceListId: listId });
-  };
+  useEffect(() => {
+    const fetchTaskLists = async () => {
+      setIsLoading(true); // Set loading to true before fetching
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
+      try {
+        const response = await fetch(`http://localhost:5000/api/tasklists?userEmail=${localStorage.email}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch task lists');
+        }
+        const data = await response.json();
+        setLists(data);
+      } catch (error) {
+        console.error('Error fetching task lists:', error);
+      } finally {
+        setIsLoading(false); // Set loading to false after fetching is done
+      }
+    };
 
-  const handleDrop = (targetListId) => {
-    if (draggedCard && draggedCard.sourceListId !== targetListId) {
-      setLists((prevLists) => {
-        const sourceList = prevLists.find((list) => list.id === draggedCard.sourceListId);
-        const targetList = prevLists.find((list) => list.id === targetListId);
+    fetchTaskLists();
+  }, []); // Empty dependency array ensures this runs only once on component mount
 
-        const updatedSourceList = {
-          ...sourceList,
-          cards: sourceList.cards.filter((card) => card.id !== draggedCard.card.id),
-        };
-
-        const updatedTargetList = {
-          ...targetList,
-          cards: [...targetList.cards, draggedCard.card],
-        };
-
-        return prevLists.map((list) => {
-          if (list.id === draggedCard.sourceListId) return updatedSourceList;
-          if (list.id === targetListId) return updatedTargetList;
-          return list;
-        });
-      });
+  const addNewList = async () => {
+    if (!newListTitle.trim()) {
+      alert('List name cannot be empty.');
+      return;
     }
-    setDraggedCard(null);
-  };
 
-  const addNewList = () => {
     const newList = {
-      id: `list-${lists.length + 1}`,
-      title: `New List`,
+      title: newListTitle,
+      createdBy: localStorage.email,
       cards: [],
     };
-    setLists([...lists, newList]);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/tasklists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newList),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add a new task list');
+      }
+
+      const savedList = await response.json();
+
+      // Optimistically update the UI by adding the new list to the state
+      setLists((prevLists) => [...prevLists, savedList]);
+
+      // Reset input and close the form
+      setNewListTitle('');
+      setIsAddingList(false);
+    } catch (error) {
+      console.error('Error adding new task list:', error);
+    }
   };
 
-  const addNewCard = (listId) => {
-    setLists((prevLists) => {
-      return prevLists.map((list) => {
-        if (list.id === listId) {
-          return {
-            ...list,
-            cards: [
-              ...list.cards,
-              {
-                id: `card-${Date.now()}`,
-                title: 'New Card',
-                description: 'Add description',
-              },
-            ],
-          };
-        }
-        return list;
-      });
-    });
+  const handleInputChange = (e) => setNewListTitle(e.target.value);
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      addNewList();
+    }
   };
 
   return (
@@ -158,16 +137,49 @@ const Taskboard = () => {
 
       <div className="rd-main-content">
         <div className="rd-lists-container">
-          {lists.map((list) => (
-            <TaskList
-              tasks = {initialData.lists}
-            />
-          ))}
+          {/* Show loading spinner if data is being fetched */}
+          {isLoading ? (
+            <div className="rd-spinner">
+              <Circles height="80" width="80" color="blue" ariaLabel="loading" />
+            </div>
+          ) : (
+            // Render lists when not loading
+            lists.map((list) => (
+              <TaskList key={list.name} lname={list.name} tasks={list.tasks} />
+            ))
+          )}
 
-          <button onClick={addNewList} className="rd-add-list-btn">
-            <Plus className="rd-plus-icon" />
-            Add another list
-          </button>
+          {isAddingList ? (
+            <div className="rd-add-list-form">
+              <input
+                type="text"
+                value={newListTitle}
+                onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
+                placeholder="Enter list name"
+                className="rd-add-list-input"
+              />
+              <div className="rd-add-list-actions">
+                <button onClick={addNewList} className="rd-add-list-submit">
+                  Add List
+                </button>
+                <button
+                  onClick={() => setIsAddingList(false)}
+                  className="rd-add-list-cancel"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsAddingList(true)}
+              className="rd-add-list-btn"
+            >
+              <Plus className="rd-plus-icon" />
+              Add another list
+            </button>
+          )}
         </div>
       </div>
     </div>
