@@ -1,32 +1,10 @@
-.message-container {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-  }
-  
-  .message-list {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 20px;
-  }
-  
-  .message-item {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .message-input {
-    width: 80%;
-    padding: 10px;
-    margin-right: 10px;
-  }
-  
-  .message-button {
-    padding: 10px 20px;
-    background-color: #ffc107;
-    color: black;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
+.message {
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  background-color: #f1f1f1;
+}
+
+.message strong {
+  color: #007bff;
+}

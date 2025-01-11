@@ -1,11 +1,23 @@
 .sidebar-view {
-  flex: 1;
-  padding: 20px;
-  background-color: #f8f8f8;
-  color: #333;
+  margin-bottom: 20px;
 }
 
-h2 {
-  font-size: 24px;
-  color: #4a154b;
+.sidebar-view h3 {
+  margin: 10px 0;
+  color: #fff;
+}
+
+.sidebar-view ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar-view li {
+  padding: 5px 0;
+  cursor: pointer;
+  color: #d1d1d1;
+}
+
+.sidebar-view li:hover {
+  color: #61dafb;
 }
