@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import "../../CSS/Homepage/navbar.css";
 import logo from "../../Images/logo.png";
 import { FaUserCircle } from 'react-icons/fa';
- 
 import { FiPlusCircle, FiSearch, FiUser, FiLogOut } from 'react-icons/fi';
 
 const Navbar = () => {
@@ -55,12 +54,12 @@ const Navbar = () => {
           </div>
           <button className="workspace-btn" title="Create Workspace">
             <FiPlusCircle />
-            <Link to="/dashboard">Create Workspace</Link>
+            <Link to="/workspace/create">Create Workspace</Link>
           </button>
           {isAuthenticated ? (
             <div className="user-menu">
               <button className="user-menu-btn">
-              <FaUserCircle className="avatar" />
+                <FaUserCircle className="avatar" />
                 <span>{truncateEmail(userName)}</span>
               </button>
               <div className="user-dropdown">
@@ -76,7 +75,7 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="auth-buttons">
-              <Link to="/login" className="login-btn">Sign In </Link>
+              <Link to="/login" className="login-btn">Sign In</Link>
               <Link to="/signup" className="signup-btn">Sign Up</Link>
             </div>
           )}
