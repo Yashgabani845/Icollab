@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import "../../CSS/Dashboard/Sidebar.css";
-import { FaHome, FaUser, FaCog, FaInfoCircle } from "react-icons/fa";
+import SidebarView from './SidebarView';
 
-const Sidebar = ({ onIconClick }) => {
+const Sidebar = () => {
   return (
-    <div className="sidebar">
-      <div className="icon" onClick={() => onIconClick("home")}> <FaHome /> </div>
-      <div className="icon" onClick={() => onIconClick("profile")}> <FaUser /> </div>
-      <div className="icon" onClick={() => onIconClick("settings")}> <FaCog /> </div>
-      <div className="icon" onClick={() => onIconClick("about")}> <FaInfoCircle /> </div>
+    <div className="sidebar-container">
+      <SidebarView title="Channels" />
+      <SidebarView title="Direct Messages" />
     </div>
   );
 };

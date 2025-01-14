@@ -2,6 +2,9 @@ const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const jwt = require("jsonwebtoken");
+require('dotenv').config(); // Load environment variables
+const User = require("./models/User");
+const Workspace = require("./models/Workspace"); // Assuming Workspace model is in 'models' folder
 const workspaceRoutes = require("./Routes/workspaceRoutes");
 const channelRoutes = require("./Routes/channelRoutes");
 const messageRoutes = require("./Routes/messageRoutes");
@@ -18,11 +21,11 @@ const URI = process.env.MONGO_URI || 'mongodb+srv://YashGabani:Yash9182@cluster0
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(URI); 
+    await mongoose.connect(URI);
     console.log('Connected to MongoDB Atlas');
   } catch (error) {
     console.error('Error connecting to MongoDB:', error.message);
-    process.exit(1); 
+    process.exit(1);
   }
 };
 
@@ -33,307 +36,252 @@ const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 
 app.use(cors());
-
 app.use(express.json());
-app.use("/api/workspaces", workspaceRoutes);
-app.use("/api/channels", channelRoutes);
-app.use("/api/messages", messageRoutes);
+
+// Test route for checking server status
 app.get('/', (req, res) => {
   res.send('MongoDB Atlas Connection Successful!');
 });
+
+// User Signup Route
 app.post('/api/signup', async (req, res) => {
-    const { firstName, lastName, email, password } = req.body;
-  
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({ message: 'All fields are required' });
-    }
-  
-    try {
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        return res.status(400).json({ message: 'Email already exists' });
-      }
-  
-      const newUser = new User({ firstName, lastName, email, password, authType: 'local' });
-      await newUser.save();
-      const token = jwt.sign(
-        { id: newUser._id, email: newUser.email },
-        process.env.JWT_SECRET || "yash1234",
-        { expiresIn: "1h" }
-      );
-      res.status(201).json({ message: 'User created successfully', user: newUser });
-    } catch (error) {
-      console.error('Error creating user:', error.message);
-      res.status(500).json({ message: 'Internal server error' });
-    }
-  });
+  const { firstName, lastName, email, password } = req.body;
 
-  app.post("/api/login", async (req, res) => {
-    const { email, password } = req.body;
-  
-    // Check if email and password are provided
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
-    }
-  
-    try {
-      // Find user by email
-      const user = await User.findOne({ email });
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      if (user.authType !== 'local') {
-        return res.status(400).json({ 
-          message: "This email is registered with Google. Please use Google Sign In." 
-        });
-      }
-  
-      // Check password
-      const isPasswordValid = password === user.password;
-      if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-  
-      // Generate JWT token
-      const token = jwt.sign(
-        { id: user._id, email: user.email },
-        process.env.JWT_SECRET || "yash1234",
-        { expiresIn: "1h" }
-      );
-  
-      res.status(200).json({
-        message: "Login successful",
-        token,
-        user: {
-          id: user._id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-        },
-      });
-    } catch (error) {
-      console.error("Error during login:", error.message);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
-  app.post('/api/google-signup', async (req, res) => {
-    const { email, firstName, lastName, password,googleId } = req.body;
-  
-    try {
-      // Check if user exists
-      let user = await User.findOne({ email });
-  
-      if (user) {
-        // If user exists but with local auth, return error
-        if (user.authType === 'local') {
-          return res.status(400).json({ 
-            message: 'Email already exists with password login. Please use regular login.' 
-          });
-        }
-        // If Google user exists, just log them in
-        const token = jwt.sign(
-          { id: user._id, email: user.email },
-          process.env.JWT_SECRET || "yash1234",
-          { expiresIn: "1h" }
-        );
-        return res.json({ token, user });
-      }
-  
-      // Create new Google user
-      user = new User({
-        firstName,
-        lastName,
-        email,
-        password,
-        googleId,
-        authType: 'google'
-      });
-      await user.save();
-  
-      // Generate token
-      const token = jwt.sign(
-        { id: user._id, email: user.email },
-        process.env.JWT_SECRET || "yash1234",
-        { expiresIn: "1h" }
-      );
-  
-      res.status(201).json({
-        message: 'User created successfully',
-        
-        user: {
-          id: user._id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName
-        }
-      });
-    } catch (error) {
-      console.error('Error during Google signup:', error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  });
-  
-  // Google login endpoint
-  app.post('/api/google-login', async (req, res) => {
-    const { email, googleId } = req.body;
-  
-    try {
-      const user = await User.findOne({ email });
-  
-      if (!user) {
-        return res.status(404).json({ 
-          message: 'User not found. Please sign up first.' 
-        });
-      }
-  
-      // Verify it's a Google auth user
-      if (user.authType !== 'google') {
-        return res.status(400).json({ 
-          message: 'This email is registered with password login. Please use regular login.' 
-        });
-      }
-  
-      // Verify Google ID
-      if (user.googleId !== googleId) {
-        return res.status(401).json({ message: 'Invalid credentials' });
-      }
-  
-      const token = jwt.sign(
-        { id: user._id, email: user.email },
-        process.env.JWT_SECRET || "yash1234",
-        { expiresIn: "1h" }
-      );
-  
-      res.json({
-        token,
-        user: {
-          id: user._id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName
-        }
-      });
-    } catch (error) {
-      console.error('Error during Google login:', error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  });
-
-  app.get('/api/tasklists', async (req, res) => {
-    const {  userEmail } = req.query;
-    const user = await User.findOne({ email: userEmail });
-
-    try {
-      const taskLists = await TaskList.find({createdBy:user._id});  
-      res.json(taskLists);  
-    } catch (error) {
-      console.error('Error fetching task lists:', error);
-      res.status(500).json({ message: 'Failed to fetch task lists' });
-    }
-  });
-app.post('/api/tasklists', async (req, res) => {
-  const { title, cards ,createdBy} = req.body;  
-  const create = await User.findOne({ email: createdBy });
-  if (!title || !cards || !create) {
-    return res.status(400).json({ message: 'Title and cards are required' });
+  if (!firstName || !lastName || !email || !password) {
+    return res.status(400).json({ message: 'All fields are required' });
   }
 
   try {
-    const newTaskList = new TaskList({
-      name:title,
-      createdBy:create._id,
-      createdAt: Date.now(),
-      tasks:cards, 
-    });
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already exists' });
+    }
 
-    const savedList = await newTaskList.save();  
-    res.status(201).json(savedList);  
+    const newUser = new User({ firstName, lastName, email, password, authType: 'local' });
+    await newUser.save();
+    const token = jwt.sign(
+      { id: newUser._id, email: newUser.email },
+      process.env.JWT_SECRET || "yash1234",
+      { expiresIn: "1h" }
+    );
+    res.status(201).json({ message: 'User created successfully', user: newUser });
   } catch (error) {
-    console.error('Error adding new task list:', error);
-    res.status(500).json({ message: 'Failed to add a new task list' });
+    console.error('Error creating user:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 
+// User Login Route
+app.post("/api/login", async (req, res) => {
+  const { email, password } = req.body;
 
-app.get('/api/tasks', async (req, res) => {
-  const { taskListName, userEmail } = req.query;
-console.log(req.query)
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
+
   try {
-    const taskList = await TaskList.findOne({ name: taskListName });
-    if (!taskList) {
-      return res.status(400).json({ error: 'TaskList not found' });
-    }
-
-    const user = await User.findOne({ email: userEmail });
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
-console.log(user,taskList)
-    const tasks = await Task.find({
-      createdBy: user._id,
-      taskListId: taskList._id,
 
-    })
-console.log(tasks)
-    res.status(200).json(tasks);
+    if (user.authType !== 'local') {
+      return res.status(400).json({ 
+        message: "This email is registered with Google. Please use Google Sign In." 
+      });
+    }
+
+    const isPasswordValid = password === user.password;
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET || "yash1234",
+      { expiresIn: "1h" }
+    );
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+    });
   } catch (error) {
-    console.error('Error fetching tasks:', error);
-    res.status(500).json({ error: 'Failed to fetch tasks' });
+    console.error("Error during login:", error.message);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
-app.post('/api/tasks', async (req, res) => {
-  const {title,description,priority,createdBy,Tasklist } = req.body;
+app.get('/api/current-user', async (req, res) => {
+  const token = req.headers['authorization']?.split(' ')[1]; // Get the token from the Authorization header
+  if (!token) {
+    return res.status(403).json({ message: 'No token provided' });
+  }
 
   try {
-    // Find the TaskList by its name
-    console.log(req.body)
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "yash1234"); // Decode the token
+    const user = await User.findById(decoded.id); // Find the user based on the decoded user ID
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ email: user.email }); // Send the user's email back
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    res.status(500).json({ message: 'Failed to fetch user data' });
+  }
+});
+
+// Google Signup Route
+app.post('/api/google-signup', async (req, res) => {
+  const { email, firstName, lastName, password, googleId } = req.body;
+
+  try {
+    let user = await User.findOne({ email });
+
+    if (user) {
+      if (user.authType === 'local') {
+        return res.status(400).json({ 
+          message: 'Email already exists with password login. Please use regular login.' 
+        });
+      }
+      
+      const token = jwt.sign(
+        { id: user._id, email: user.email },
+        process.env.JWT_SECRET || "yash1234",
+        { expiresIn: "1h" }
+      );
+      return res.json({ token, user });
+    }
+
+    user = new User({
+      firstName,
+      lastName,
+      email,
+      password,
+      googleId,
+      authType: 'google'
+    });
+    await user.save();
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET || "yash1234",
+      { expiresIn: "1h" }
+    );
+
+    res.status(201).json({
+      message: 'User created successfully',
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      }
+    });
+  } catch (error) {
+    console.error('Error during Google signup:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Google Login Route
+app.post('/api/google-login', async (req, res) => {
+  const { email, googleId } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ 
+        message: 'User not found. Please sign up first.' 
+      });
+    }
+
+    if (user.authType !== 'google') {
+      return res.status(400).json({ 
+        message: 'This email is registered with password login. Please use regular login.' 
+      });
+    }
+
+    if (user.googleId !== googleId) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET || "yash1234",
+      { expiresIn: "1h" }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      }
+    });
+  } catch (error) {
+    console.error('Error during Google login:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Workspace Routes
+app.post('/api/workspaces', async (req, res) => {
+  const { name, description, createdBy } = req.body;
+
+  if (!name || !description || !createdBy) {
+    return res.status(400).json({ message: 'Name, description, and createdBy are required' });
+  }
+
+  try {
     const user = await User.findOne({ email: createdBy });
     if (!user) {
-      return res.status(400).json({ error: 'User not found' });
+      return res.status(404).json({ message: 'User not found' });
     }
 
-    const taskList = await TaskList.findOne({ name: Tasklist , createdBy : user._id });
-    console.log(taskList)
-    if (!taskList) {
-      return res.status(400).json({ error: 'TaskList not found' });
-    }
-
-    // Find the User by their email
-    
-    // Check if the task with the same title already exists in the TaskList for the given user
-    const existingTask = await Task.findOne({
-      createdBy: user._id,
-      taskListId: taskList._id,
-      title,
-    });
-
-    if (existingTask) {
-      return res.status(400).json({ error: 'A task with this title already exists in this task list' });
-    }
-
-    // Create and save the new task
-    const newTask = new Task({
-      title,
+    const newWorkspace = new Workspace({
+      name,
       description,
-      assignedTo:[],
-      priority,
-      labels:[],
-      checklist:[],
-      taskListId: taskList._id, // Tied to the task list
-      createdBy: user._id, // User creating the task
+      createdBy: user._id, // Save the user ID, not email
     });
 
-    await newTask.save();
-    taskList.tasks.push(newTask._id);
-    await taskList.save();
-    
-    res.status(201).json(newTask);
+    const savedWorkspace = await newWorkspace.save();
+    res.status(201).json(savedWorkspace);
   } catch (error) {
-    console.error('Error creating task:', error);
-    res.status(500).json({ error: 'Failed to create task' });
+    console.error('Error creating workspace:', error);
+    res.status(500).json({ message: 'Error creating workspace' });
+  }
+});
+
+app.get("/api/workspaces", async (req, res) => {
+  const { userEmail } = req.query;
+
+  if (!userEmail) {
+    return res.status(400).json({ message: "User email is required" });
+  }
+
+  try {
+    const user = await User.findOne({ email: userEmail });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const workspaces = await Workspace.find({ createdBy: user._id });
+    res.status(200).json(workspaces);
+  } catch (error) {
+    console.error('Error fetching workspaces:', error);
+    res.status(500).json({ message: 'Failed to fetch workspaces' });
   }
 });
 
@@ -405,9 +353,7 @@ app.get('/api/messages/:userEmail', async (req, res) => {
   }
 });
 
-
-
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

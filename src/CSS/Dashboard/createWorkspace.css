@@ -1,0 +1,40 @@
+.create-workspace-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .create-workspace-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .create-workspace-form label {
+    margin-bottom: 5px;
+  }
+  
+  .create-workspace-form input {
+    margin-bottom: 10px;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+  }
+  
+  .create-workspace-form button {
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .create-workspace-form button:hover {
+    background-color: #45a049;
+  }
+  
+  .error {
+    color: red;
+    font-size: 14px;
+  }
+  

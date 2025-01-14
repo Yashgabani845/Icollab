@@ -1,24 +1,17 @@
 import React from "react";
 import "../../CSS/Dashboard/MessageSection.css"
 
+import MessageInput from './MessageInput';
+import Message from './Message';
+
 const MessageSection = () => {
   return (
     <div className="message-section">
-      <h1>👋 Welcome to the #project channel</h1>
-      <p>
-        This channel is for everything #project. Hold meetings, share docs and
-        make decisions together.
-      </p>
       <div className="messages">
-        <div className="message">
-          <strong>Yash Gabani</strong> <span>10:56</span>
-          <p>joined #yashgabani.</p>
-        </div>
-        <div className="message">
-          <strong>Meet Antala</strong> <span>12:31</span>
-          <p>joined #meetantala.</p>
-        </div>
+        <Message text="Hello, Team!" sender="John" />
+        <Message text="Good morning!" sender="Jane" />
       </div>
+      <MessageInput />
     </div>
   );
 };

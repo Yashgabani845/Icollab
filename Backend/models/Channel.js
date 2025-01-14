@@ -1,10 +1,20 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const channelSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  workspace: { type: mongoose.Schema.Types.ObjectId, ref: 'Workspace', required: true },
-  members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }],
-});
+const ChannelSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  workspace: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Workspace",
+    required: true
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  }
+}, { timestamps: true });
 
-module.exports = mongoose.model('Channel', channelSchema);
+module.exports = mongoose.model("Channel", ChannelSchema);

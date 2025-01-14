@@ -1,4 +1,6 @@
+// Message model (models/Message.js)
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const messageSchema = new mongoose.Schema({
   content: { type: String, required: true },
