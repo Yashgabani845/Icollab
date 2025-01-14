@@ -9,6 +9,7 @@ import Pricing from "./components/Auth/Pricing";
 import Taskboard from "./components/Task/Taskboard";
 import VideoChat from "./components/VideoChat/Videochat";
 import VideoCall from "./components/VideoChat/VideoCall";
+import Chat from "./components/Chat/Chat";
 const App = () => {
   return (
     <Router>
@@ -22,6 +23,8 @@ const App = () => {
         <Route path="/task" element={<Taskboard/>}/>
         <Route path="/video" element={<VideoChat/>}/>
         <Route path="/videocall" element={<VideoCall/>}/>
+        <Route path="/chat" element={<Chat/>}/>
+
       </Routes>
     </Router>
   );

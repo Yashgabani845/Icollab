@@ -5,10 +5,14 @@ const jwt = require("jsonwebtoken");
 const workspaceRoutes = require("./Routes/workspaceRoutes");
 const channelRoutes = require("./Routes/channelRoutes");
 const messageRoutes = require("./Routes/messageRoutes");
-require('dotenv').config(); // Load environment variables
+require('dotenv').config(); 
 const User = require("./models/User")
 const TaskList = require('./models/TaskList');  
-const Task = require('./models/Task'); // Assuming Task model is in 'models' folder
+const { Server } = require('socket.io');
+const http = require('http');
+const Message = require('./models/Message');
+const nodemailer = require('nodemailer');
+const Task = require('./models/Task'); 
 
 const URI = process.env.MONGO_URI || 'mongodb+srv://YashGabani:Yash9182@cluster0.n77u6.mongodb.net/Icollab?retryWrites=true&w=majority&appName=Cluster0';
 
@@ -25,6 +29,8 @@ const connectDB = async () => {
 connectDB();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
 
 app.use(cors());
 
@@ -332,8 +338,80 @@ app.post('/api/tasks', async (req, res) => {
 });
 
 
+io.on('connection', (socket) => {
+  // Store user email when they connect
+  socket.on('register', (email) => {
+    socket.email = email;
+    socket.join(email); // Join a room with their email
+  });
+
+  // Handle new message
+  socket.on('sendMessage', async (data) => {
+    try {
+      const { content, receiverEmail, senderEmail, messageType = 'text' } = data;
+
+      // Save message to database
+      const newMessage = new Message({
+        content,
+        sender: senderEmail,
+        receiver: receiverEmail,
+        messageType,
+        isRead: false,
+      });
+
+      await newMessage.save();
+
+      // Emit the message to both sender and receiver
+      io.to(receiverEmail).emit('newMessage', newMessage);
+      io.to(senderEmail).emit('newMessage', newMessage);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  });
+
+  // Mark messages as read
+  socket.on('markAsRead', async (senderEmail) => {
+    try {
+      await Message.updateMany(
+        { sender: senderEmail, receiver: socket.email, isRead: false },
+        { isRead: true }
+      );
+      io.to(senderEmail).emit('messagesRead', socket.email);
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
+  });
+});
+
+// API Endpoints
+app.get('/api/messages/:userEmail', async (req, res) => {
+  try {
+    const { userEmail } = req.params;
+    const { with: withEmail } = req.query;
+
+    const messages = await Message.find({
+      $or: [
+        { sender: userEmail, receiver: withEmail },
+        { sender: withEmail, receiver: userEmail },
+      ],
+    })
+      .sort({ createdAt: 1 })
+      .populate('sender', 'email')
+      .populate('receiver', 'email');
+
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching messages' });
+  }
+});
+
+
 
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+server.listen(5001, () => {
+  console.log('Server running on http://localhost:5000');
 });
