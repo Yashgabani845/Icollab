@@ -12,6 +12,7 @@ import WorkspaceDashboard from './components/Dashboard/workspaceDashboard';
 import CreateWorkspaceForm from './components/Dashboard/CreateWorkspaceForm';  // Import the new workspace form
 
 import Chat from "./components/Chat/Chat";
+import ChatComponent from "./components/Chat/ChatComponent";
 const App = () => {
   return (
     <Router>
@@ -31,6 +32,7 @@ const App = () => {
         <Route path="/video" element={<VideoChat/>}/>
         <Route path="/videocall" element={<VideoCall/>}/>
         <Route path="/chat" element={<Chat/>}/>
+        <Route path="/livechat" element={<ChatComponent/>}/>
 
       </Routes>
     </Router>

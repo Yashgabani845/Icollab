@@ -1,4 +1,3 @@
-// ChatComponent.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import "../../CSS/chat.css";
@@ -11,7 +10,6 @@ const ChatComponent = ({ currentUser, selectedUser }) => {
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
-  // Socket connection
   useEffect(() => {
     if (!socketRef.current) {
       socketRef.current = io('http://localhost:5001');
@@ -57,7 +55,6 @@ const ChatComponent = ({ currentUser, selectedUser }) => {
         if (!response.ok) {
           throw new Error('Failed to fetch messages');
         }
-
         const data = await response.json();
         setMessages(data);
       } catch (error) {
@@ -66,24 +63,20 @@ const ChatComponent = ({ currentUser, selectedUser }) => {
         setLoading(false);
       }
     };
-
     fetchMessages();
   }, [currentUser.email, selectedUser]);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     if (!loading) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, loading]);
-
   const handleSend = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !socketRef.current) return;
 
     const messageContent = newMessage.trim();
 
-    // Send message through socket
     socketRef.current.emit('sendMessage', {
       content: messageContent,
       receiverEmail: selectedUser.email,
@@ -127,7 +120,6 @@ const ChatComponent = ({ currentUser, selectedUser }) => {
           </>
         )}
       </div>
-
       <form className="message-input-form" onSubmit={handleSend}>
         <input
           type="text"
@@ -141,5 +133,4 @@ const ChatComponent = ({ currentUser, selectedUser }) => {
     </div>
   );
 };
-
 export default ChatComponent;

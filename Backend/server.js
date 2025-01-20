@@ -282,6 +282,108 @@ app.get("/api/workspaces", async (req, res) => {
   }
 });
 
+app.get('/api/tasklists', async (req, res) => {
+  const {  userEmail } = req.query;
+  const user = await User.findOne({ email: userEmail });
+  try {
+    const taskLists = await TaskList.find({createdBy:user._id});  
+    res.json(taskLists);  
+  } catch (error) {
+    console.error('Error fetching task lists:', error);
+    res.status(500).json({ message: 'Failed to fetch task lists' });
+  }
+});
+app.post('/api/tasklists', async (req, res) => {
+const { title, cards ,createdBy} = req.body;  
+const create = await User.findOne({ email: createdBy });
+if (!title || !cards || !create) {
+  return res.status(400).json({ message: 'Title and cards are required' });
+}
+try {
+  const newTaskList = new TaskList({
+    name:title,
+    createdBy:create._id,
+    createdAt: Date.now(),
+    tasks:cards, 
+  });
+  const savedList = await newTaskList.save();  
+  res.status(201).json(savedList);  
+} catch (error) {
+  console.error('Error adding new task list:', error);
+  res.status(500).json({ message: 'Failed to add a new task list' });
+}
+});
+app.get('/api/tasks', async (req, res) => {
+const { taskListName, userEmail } = req.query;
+console.log(req.query)
+try {
+  const taskList = await TaskList.findOne({ name: taskListName });
+  if (!taskList) {
+    return res.status(400).json({ error: 'TaskList not found' });
+  }
+  const user = await User.findOne({ email: userEmail });
+  if (!user) {
+    return res.status(400).json({ error: 'User not found' });
+  }
+console.log(user,taskList)
+  const tasks = await Task.find({
+    createdBy: user._id,
+    taskListId: taskList._id,
+  })
+console.log(tasks)
+  res.status(200).json(tasks);
+} catch (error) {
+  console.error('Error fetching tasks:', error);
+  res.status(500).json({ error: 'Failed to fetch tasks' });
+}
+});
+app.post('/api/tasks', async (req, res) => {
+const {title,description,priority,createdBy,Tasklist } = req.body;
+try {
+  // Find the TaskList by its name
+  console.log(req.body)
+  const user = await User.findOne({ email: createdBy });
+  if (!user) {
+    return res.status(400).json({ error: 'User not found' });
+  }
+  const taskList = await TaskList.findOne({ name: Tasklist , createdBy : user._id });
+  console.log(taskList)
+  if (!taskList) {
+    return res.status(400).json({ error: 'TaskList not found' });
+  }
+  // Find the User by their email
+  
+  // Check if the task with the same title already exists in the TaskList for the given user
+  const existingTask = await Task.findOne({
+    createdBy: user._id,
+    taskListId: taskList._id,
+    title,
+  });
+  if (existingTask) {
+    return res.status(400).json({ error: 'A task with this title already exists in this task list' });
+  }
+  // Create and save the new task
+  const newTask = new Task({
+    title,
+    description,
+    assignedTo:[],
+    priority,
+    labels:[],
+    checklist:[],
+    taskListId: taskList._id, // Tied to the task list
+    createdBy: user._id, // User creating the task
+  });
+  await newTask.save();
+  taskList.tasks.push(newTask._id);
+  await taskList.save();
+  
+  res.status(201).json(newTask);
+} catch (error) {
+  console.error('Error creating task:', error);
+  res.status(500).json({ error: 'Failed to create task' });
+}
+});
+
 
 io.on('connection', (socket) => {
   // Store user email when they connect
@@ -385,5 +487,5 @@ app.listen(PORT, () => {
 });
 
 server.listen(5001, () => {
-  console.log('Server running on http://localhost:5000');
+  console.log('Server running on http://localhost:5001');
 });
