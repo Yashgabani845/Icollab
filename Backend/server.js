@@ -3,11 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require("jsonwebtoken");
 require('dotenv').config(); // Load environment variables
-const User = require("./models/User");
 const Workspace = require("./models/Workspace"); // Assuming Workspace model is in 'models' folder
-const workspaceRoutes = require("./Routes/workspaceRoutes");
-const channelRoutes = require("./Routes/channelRoutes");
-const messageRoutes = require("./Routes/messageRoutes");
+
 require('dotenv').config(); 
 const User = require("./models/User")
 const TaskList = require('./models/TaskList');  
@@ -253,7 +250,7 @@ app.post('/api/workspaces', async (req, res) => {
     const newWorkspace = new Workspace({
       name,
       description,
-      createdBy: user._id, // Save the user ID, not email
+      createdBy: user._id, 
     });
 
     const savedWorkspace = await newWorkspace.save();
@@ -332,10 +329,11 @@ io.on('connection', (socket) => {
 });
 
 // API Endpoints
+// Update the messages endpoint to include pagination
 app.get('/api/messages/:userEmail', async (req, res) => {
   try {
     const { userEmail } = req.params;
-    const { with: withEmail } = req.query;
+    const { with: withEmail, limit = 50, page = 1 } = req.query;
 
     const messages = await Message.find({
       $or: [
@@ -343,13 +341,41 @@ app.get('/api/messages/:userEmail', async (req, res) => {
         { sender: withEmail, receiver: userEmail },
       ],
     })
-      .sort({ createdAt: 1 })
-      .populate('sender', 'email')
-      .populate('receiver', 'email');
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip((page - 1) * parseInt(limit))
+      .sort({ createdAt: 1 }) // Re-sort to show oldest first
+      .lean(); // For better performance
 
     res.json(messages);
   } catch (error) {
+    console.error('Error fetching messages:', error);
     res.status(500).json({ message: 'Error fetching messages' });
+  }
+});
+
+// Update the socket message handling
+io.on('sendMessage', async (data) => {
+  try {
+    const { content, receiverEmail, senderEmail, messageType = 'text' } = data;
+
+    const newMessage = new Message({
+      content,
+      sender: senderEmail,
+      receiver: receiverEmail,
+      messageType,
+      isRead: false,
+      createdAt: new Date(),
+    });
+
+    const savedMessage = await newMessage.save();
+    const messageToSend = await Message.findById(savedMessage._id).lean();
+
+    // Only emit to the specific rooms
+    socket.to(receiverEmail).emit('newMessage', messageToSend);
+    socket.emit('newMessage', messageToSend); // Send to sender
+  } catch (error) {
+    console.error('Error sending message:', error);
   }
 });
 

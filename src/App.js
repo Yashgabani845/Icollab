@@ -25,7 +25,7 @@ const App = () => {
         <Route path="/video" element={<VideoChat />} />
         <Route path="/videocall" element={<VideoCall />} />
         <Route path="/workspace/create" element={<CreateWorkspaceForm />} /> {/* Route for creating workspace */}
-        <Route path="/workspace/dashboard" element={<WorkspaceDashboard />} />
+        <Route path="/dashboard" element={<WorkspaceDashboard />} />
         <Route path="/pricing" element={<Pricing/>}/>
         <Route path="/task" element={<Taskboard/>}/>
         <Route path="/video" element={<VideoChat/>}/>

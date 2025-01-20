@@ -5,7 +5,7 @@ import "../../CSS/Dashboard/createWorkspace.css"; // Add your custom styles here
 const CreateWorkspaceForm = () => {
   const [workspaceName, setWorkspaceName] = useState("");
   const [workspaceDescription, setWorkspaceDescription] = useState("");
-  const [userEmail, setUserEmail] = useState(""); // Set the user email from the backend
+  const [userEmail, setUserEmail] = useState(localStorage.email); // Set the user email from the backend
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
