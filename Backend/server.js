@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const jwt = require("jsonwebtoken");
-require('dotenv').config(); // Load environment variables
-const Workspace = require("./models/WorkSpace"); // Assuming Workspace model is in 'models' folder
+require('dotenv').config(); 
+const Workspace = require("./models/WorkSpace"); 
 
 require('dotenv').config(); 
 const User = require("./models/User")
@@ -133,6 +133,49 @@ app.get('/api/current-user', async (req, res) => {
   } catch (error) {
     console.error('Error fetching user data:', error);
     res.status(500).json({ message: 'Failed to fetch user data' });
+  }
+});
+
+app.get("/api/users/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findById(id).select("email name"); // Select only the required fields
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user by ID:", error);
+    res.status(500).json({ message: "Failed to fetch user", error: error.message });
+  }
+});
+// Create a new profile API that returns both user details and workspaces
+app.get("/api/profile", async (req, res) => {
+  const { email } = req.query;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  try {
+    // Fetch user details
+    const user = await User.findOne({ email }).select("email name role phone"); // Adjust fields as needed
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Fetch workspaces created by the user
+    const workspaces = await Workspace.find({ createdBy: user._id });
+    if (!workspaces) {
+      return res.status(404).json({ message: "No workspaces found" });
+    }
+
+    // Send both user details and workspaces
+    res.status(200).json({ user, workspaces });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    res.status(500).json({ message: "Failed to fetch profile", error: error.message });
   }
 });
 
