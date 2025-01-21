@@ -10,7 +10,6 @@ const WorkspaceDashboard = () => {
   const [showChannelForm, setShowChannelForm] = useState(false);
 
   useEffect(() => {
-    // Fetch the channels for the workspace
     const fetchChannels = async () => {
       try {
         const response = await axios.get(`/api/channels?workspaceId=${workspaceId}`);

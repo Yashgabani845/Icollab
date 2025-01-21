@@ -1,121 +1,264 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../CSS/Dashboard/createWorkspace.css"; // Add your custom styles here
+import { AlertCircle } from "lucide-react";
+import "../../CSS/Dashboard/createWorkspace.css";
 
 const CreateWorkspaceForm = () => {
-  const [workspaceName, setWorkspaceName] = useState("");
-  const [workspaceDescription, setWorkspaceDescription] = useState("");
-  const [userEmail, setUserEmail] = useState(localStorage.email); // Set the user email from the backend
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    members: [],
+    projects: [],
+    chat: {
+      channels: []
+    },
+    documentation: [],
+    notifications: []
+  });
+  
+  const [newMember, setNewMember] = useState({ userId: "", role: "viewer" });
+  const [newProject, setNewProject] = useState({ name: "", status: "active" });
+  const [newChannel, setNewChannel] = useState({ name: "", members: [] });
+  const [newDocument, setNewDocument] = useState({ title: "", content: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Fetch current user data using JWT token
-  useEffect(() => {
-    const fetchUserEmail = async () => {
-      const token = localStorage.getItem("token"); // Assuming you store token in localStorage
-      if (!token) {
-        setError("You need to be logged in to create a workspace.");
-        return;
-      }
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-      try {
-        const response = await fetch("http://localhost:5000/api/current-user", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          },
-        });
+  const addMember = () => {
+    if (newMember.userId) {
+      setFormData(prev => ({
+        ...prev,
+        members: [...prev.members, newMember]
+      }));
+      setNewMember({ userId: "", role: "viewer" });
+    }
+  };
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch user data");
+  const addProject = () => {
+    if (newProject.name) {
+      setFormData(prev => ({
+        ...prev,
+        projects: [...prev.projects, newProject]
+      }));
+      setNewProject({ name: "", status: "active" });
+    }
+  };
+
+  const addChannel = () => {
+    if (newChannel.name) {
+      setFormData(prev => ({
+        ...prev,
+        chat: {
+          channels: [...prev.chat.channels, newChannel]
         }
+      }));
+      setNewChannel({ name: "", members: [] });
+    }
+  };
 
-        const data = await response.json();
-        setUserEmail(data.email); // Set the current user's email
-      } catch (error) {
-        setError(error.message);
-      }
-    };
+  const addDocument = () => {
+    if (newDocument.title && newDocument.content) {
+      setFormData(prev => ({
+        ...prev,
+        documentation: [...prev.documentation, {
+          ...newDocument,
+          createdBy: localStorage.email,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }]
+      }));
+      setNewDocument({ title: "", content: "" });
+    }
+  };
 
-    fetchUserEmail();
-  }, []);
-
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate if workspace name and description are provided
-    if (!workspaceName || !workspaceDescription) {
-      setError("Please fill in all fields.");
+    
+    if (!formData.name || !formData.description) {
+      setError("Name and description are required");
       return;
     }
-
-    // Check if userEmail is not empty
-    if (!userEmail) {
-      setError("User not authenticated.");
-      return;
-    }
-
-    // Prepare data for the POST request
-    const workspaceData = {
-      name: workspaceName,
-      description: workspaceDescription,
-      createdBy: userEmail, // Ensure the userEmail is correct and set
-    };
 
     try {
-      // Make the POST request to create a workspace
       const response = await fetch("http://localhost:5000/api/workspaces", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(workspaceData),
+        body: JSON.stringify({
+          ...formData,
+          createdBy: localStorage.email
+        }),
       });
 
-      // If the response is not OK, handle the error
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Error creating workspace");
       }
 
-      // If successful, parse the response and log success
-      const data = await response.json();
-      console.log("Workspace created successfully:", data);
-
-      // Navigate to another page after successful creation (optional)
-      navigate("/dashboard"); // Replace with the path to redirect to after creating the workspace
+      navigate("/dashboard");
     } catch (error) {
-      // Handle any errors during the process
       setError(error.message);
-      console.error("Error creating workspace:", error.message);
     }
   };
 
   return (
-    <div className="create-workspace-container">
-      <h2>Create New Workspace</h2>
-      <form onSubmit={handleSubmit} className="create-workspace-form">
-        <label htmlFor="workspaceName">Workspace Name</label>
-        <input
-          type="text"
-          id="workspaceName"
-          value={workspaceName}
-          onChange={(e) => setWorkspaceName(e.target.value)}
-          placeholder="Enter workspace name"
-        />
+    <div className="workspace-form-container">
+      <form onSubmit={handleSubmit} className="workspace-form">
+        <h2>Create New Workspace</h2>
+        
+        {/* Basic Information */}
+        <div className="form-section">
+          <h3>Basic Information</h3>
+          <div className="form-group">
+            <label htmlFor="name">Workspace Name*</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
 
-        <label htmlFor="workspaceDescription">Workspace Description</label>
-        <textarea
-          id="workspaceDescription"
-          value={workspaceDescription}
-          onChange={(e) => setWorkspaceDescription(e.target.value)}
-          placeholder="Enter workspace description"
-        />
+          <div className="form-group">
+            <label htmlFor="description">Description*</label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+        </div>
 
-        {error && <p className="error">{error}</p>}
+        {/* Members Section */}
+        <div className="form-section">
+          <h3>Add Members</h3>
+          <div className="form-group">
+            <input
+              type="email"
+              placeholder="Member Email"
+              value={newMember.userId}
+              onChange={(e) => setNewMember({...newMember, userId: e.target.value})}
+            />
+            <select
+              value={newMember.role}
+              onChange={(e) => setNewMember({...newMember, role: e.target.value})}
+            >
+              <option value="viewer">Viewer</option>
+              <option value="editor">Editor</option>
+              <option value="admin">Admin</option>
+            </select>
+            <button type="button" onClick={addMember} className="add-button">
+              Add Member
+            </button>
+          </div>
+          <div className="members-list">
+            {formData.members.map((member, index) => (
+              <div key={index} className="member-item">
+                {member.userId} - {member.role}
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <button type="submit">Create Workspace</button>
+        {/* Projects Section */}
+        <div className="form-section">
+          <h3>Add Projects</h3>
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="Project Name"
+              value={newProject.name}
+              onChange={(e) => setNewProject({...newProject, name: e.target.value})}
+            />
+            <select
+              value={newProject.status}
+              onChange={(e) => setNewProject({...newProject, status: e.target.value})}
+            >
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
+              <option value="on-hold">On Hold</option>
+            </select>
+            <button type="button" onClick={addProject} className="add-button">
+              Add Project
+            </button>
+          </div>
+          <div className="projects-list">
+            {formData.projects.map((project, index) => (
+              <div key={index} className="project-item">
+                {project.name} - {project.status}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Chat Channels Section */}
+        <div className="form-section">
+          <h3>Chat Channels</h3>
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="Channel Name"
+              value={newChannel.name}
+              onChange={(e) => setNewChannel({...newChannel, name: e.target.value})}
+            />
+            <button type="button" onClick={addChannel} className="add-button">
+              Add Channel
+            </button>
+          </div>
+          <div className="channels-list">
+            {formData.chat.channels.map((channel, index) => (
+              <div key={index} className="channel-item">
+                {channel.name}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Documentation Section */}
+        <div className="form-section">
+          <h3>Documentation</h3>
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="Document Title"
+              value={newDocument.title}
+              onChange={(e) => setNewDocument({...newDocument, title: e.target.value})}
+            />
+            <textarea
+              placeholder="Document Content"
+              value={newDocument.content}
+              onChange={(e) => setNewDocument({...newDocument, content: e.target.value})}
+            />
+            <button type="button" onClick={addDocument} className="add-button">
+              Add Document
+            </button>
+          </div>
+          <div className="documents-list">
+            {formData.documentation.map((doc, index) => (
+              <div key={index} className="document-item">
+                {doc.title}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {error && <div className="error-message">{error}</div>}
+        
+        <button type="submit" className="submit-button">
+          Create Workspace
+        </button>
       </form>
     </div>
   );

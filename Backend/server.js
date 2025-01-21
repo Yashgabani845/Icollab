@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require("jsonwebtoken");
 require('dotenv').config(); // Load environment variables
-const Workspace = require("./models/Workspace"); // Assuming Workspace model is in 'models' folder
+const Workspace = require("./models/WorkSpace"); // Assuming Workspace model is in 'models' folder
 
 require('dotenv').config(); 
 const User = require("./models/User")
@@ -235,29 +235,95 @@ app.post('/api/google-login', async (req, res) => {
 
 // Workspace Routes
 app.post('/api/workspaces', async (req, res) => {
-  const { name, description, createdBy } = req.body;
+  const { 
+    name, 
+    description, 
+    members, 
+    projects, 
+    chat,
+    documentation,
+    notifications,
+    createdBy 
+  } = req.body;
 
   if (!name || !description || !createdBy) {
     return res.status(400).json({ message: 'Name, description, and createdBy are required' });
   }
 
   try {
+    // Find the creating user
     const user = await User.findOne({ email: createdBy });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Process members: Find all users by their emails and get their ObjectIds
+    let processedMembers = [];
+    if (members && members.length > 0) {
+      const memberEmails = members.map(member => member.userId);
+      const memberUsers = await User.find({ email: { $in: memberEmails } });
+      
+      // Create a map of email to user ObjectId for quick lookup
+      const emailToUserMap = memberUsers.reduce((map, user) => {
+        map[user.email] = user._id;
+        return map;
+      }, {});
+
+      // Process each member, replacing email with ObjectId
+      processedMembers = members.map(member => {
+        const userId = emailToUserMap[member.userId];
+        if (!userId) {
+          throw new Error(`User not found with email: ${member.userId}`);
+        }
+        return {
+          userId: userId,
+          role: member.role
+        };
+      });
+    }
+
     const newWorkspace = new Workspace({
       name,
       description,
-      createdBy: user._id, 
+      createdBy: user._id,
+      members: processedMembers,
+      projects: projects?.map(project => ({
+        name: project.name,
+        status: project.status,
+        createdAt: new Date()
+      })) || [],
+      chat: {
+        channels: chat?.channels?.map(channel => ({
+          name: channel.name,
+          members: channel.members,
+          createdAt: new Date()
+        })) || []
+      },
+      documentation: documentation?.map(doc => ({
+        title: doc.title,
+        content: doc.content,
+        createdBy: user._id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })) || [],
+      notifications: notifications || []
     });
 
     const savedWorkspace = await newWorkspace.save();
-    res.status(201).json(savedWorkspace);
+
+    // Populate the response with user details for members
+    const populatedWorkspace = await Workspace.findById(savedWorkspace._id)
+      .populate('createdBy', 'email name')
+      .populate('members.userId', 'email name')
+      .populate('documentation.createdBy', 'email name');
+
+    res.status(201).json(populatedWorkspace);
   } catch (error) {
     console.error('Error creating workspace:', error);
-    res.status(500).json({ message: 'Error creating workspace' });
+    if (error.message.includes('User not found with email')) {
+      return res.status(400).json({ message: error.message });
+    }
+    res.status(500).json({ message: 'Error creating workspace', error: error.message });
   }
 });
 
@@ -274,11 +340,21 @@ app.get("/api/workspaces", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const workspaces = await Workspace.find({ createdBy: user._id });
+    // Find workspaces where user is either creator or member
+    const workspaces = await Workspace.find({
+      $or: [
+        { createdBy: user._id },
+        { 'members.userId': user._id }
+      ]
+    })
+    .populate('createdBy', 'email name')
+    .populate('members.userId', 'email name')
+    .populate('documentation.createdBy', 'email name');
+
     res.status(200).json(workspaces);
   } catch (error) {
     console.error('Error fetching workspaces:', error);
-    res.status(500).json({ message: 'Failed to fetch workspaces' });
+    res.status(500).json({ message: 'Failed to fetch workspaces', error: error.message });
   }
 });
 
