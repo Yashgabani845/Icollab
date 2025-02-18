@@ -11,6 +11,7 @@ const TaskList = require('./models/TaskList');
 const { Server } = require('socket.io');
 const http = require('http');
 const Message = require('./models/Message');
+const Channel = require('./models/Channel')
 const nodemailer = require('nodemailer');
 const Task = require('./models/Task'); 
 
@@ -503,6 +504,40 @@ try {
 }
 });
 
+app.get("/api/channels/:workspaceName", async (req, res) => {
+  try {
+    const wname = req.params.workspacename;
+    const wspace = Workspace.find({name:wname});
+    const channels = await Channel.find({ workspace : wspace._id });
+    res.json(channels);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/channels", async (req, res) => {
+  try {
+    const { name, workspace, createdBy } = req.body;
+    if (!name || !workspace || !createdBy) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+    const user = await User.findOne({ email: createdBy });
+    console.log(user)
+    const uid= user._id;
+    const wspace = Workspace.find({name:workspace});
+    console.log(wspace)
+    const wid=wspace._id;
+    const newChannel = new Channel({name: name,workspace: wid ,createdBy: uid });
+    await newChannel.save();
+    res.status(201).json(newChannel);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 
 io.on('connection', (socket) => {
   // Store user email when they connect
@@ -534,8 +569,6 @@ io.on('connection', (socket) => {
       console.error('Error sending message:', error);
     }
   });
-
-  // Mark messages as read
   socket.on('markAsRead', async (senderEmail) => {
     try {
       await Message.updateMany(
@@ -549,8 +582,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// API Endpoints
-// Update the messages endpoint to include pagination
+
 app.get('/api/messages/:userEmail', async (req, res) => {
   try {
     const { userEmail } = req.params;
@@ -565,8 +597,8 @@ app.get('/api/messages/:userEmail', async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((page - 1) * parseInt(limit))
-      .sort({ createdAt: 1 }) // Re-sort to show oldest first
-      .lean(); // For better performance
+      .sort({ createdAt: 1 }) 
+      .lean(); 
 
     res.json(messages);
   } catch (error) {
@@ -575,7 +607,6 @@ app.get('/api/messages/:userEmail', async (req, res) => {
   }
 });
 
-// Update the socket message handling
 io.on('sendMessage', async (data) => {
   try {
     const { content, receiverEmail, senderEmail, messageType = 'text' } = data;
@@ -592,9 +623,8 @@ io.on('sendMessage', async (data) => {
     const savedMessage = await newMessage.save();
     const messageToSend = await Message.findById(savedMessage._id).lean();
 
-    // Only emit to the specific rooms
     socket.to(receiverEmail).emit('newMessage', messageToSend);
-    socket.emit('newMessage', messageToSend); // Send to sender
+    socket.emit('newMessage', messageToSend);
   } catch (error) {
     console.error('Error sending message:', error);
   }
