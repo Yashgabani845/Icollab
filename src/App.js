@@ -15,7 +15,7 @@ import Chat from "./components/Chat/Chat";
 import ChatComponent from "./components/Chat/ChatComponent";
 import Workspace from "./components/Dashboard/Workspace";
 import Profile from "./components/Auth/Profile";
-import CreateChannelForm from "./components/Dashboard/CreateChannelForm";  // Import the channel creation form
+import CreateChannel from "./components/Dashboard/CreateChannel";  // Import the channel creation form
 
 const App = () => {
   return (
@@ -32,7 +32,7 @@ const App = () => {
         <Route path="/workspace/create" element={<CreateWorkspaceForm />} />
         <Route path="/dashboard" element={<Workspace />} />
         <Route path="/workspace/:workspaceName" element={<WorkspaceDetail />} />
-        <Route path="/workspace/:workspaceName/create-channel" element={<CreateChannelForm />} /> {/* Route for creating new channel */}
+        <Route path="/workspace/:workspaceName/create-channel" element={<CreateChannel />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/livechat" element={<ChatComponent />} />
         <Route path="/profile" element={<Profile />} />
