@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertCircle } from "lucide-react";
 import "../../CSS/Dashboard/createWorkspace.css";
 
 const CreateWorkspaceForm = () => {
@@ -87,6 +86,7 @@ const CreateWorkspaceForm = () => {
     }
 
     try {
+      // 1. Create the workspace first
       const response = await fetch("http://localhost:5000/api/workspaces", {
         method: "POST",
         headers: {
@@ -103,7 +103,32 @@ const CreateWorkspaceForm = () => {
         throw new Error(errorData.message || "Error creating workspace");
       }
 
+      // 2. Create the default channel after workspace creation
+      const workspaceData = await response.json(); // Get the workspace data
+
+      const defaultChannel = {
+        name: "default",
+        description: "This is the default channel for chat",
+        workspace: workspaceData._id, // Assign the workspace ID
+        members: [localStorage.userId], // Assign the current user as the only member
+      };
+
+      const channelResponse = await fetch("http://localhost:5000/api/channels", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(defaultChannel),
+      });
+
+      if (!channelResponse.ok) {
+        const errorData = await channelResponse.json();
+        throw new Error(errorData.message || "Error creating default channel");
+      }
+
+      // After everything is created, navigate to the dashboard
       navigate("/dashboard");
+
     } catch (error) {
       setError(error.message);
     }

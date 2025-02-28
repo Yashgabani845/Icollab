@@ -8,12 +8,14 @@ import Pricing from "./components/Auth/Pricing";
 import Taskboard from "./components/Task/Taskboard";
 import VideoChat from "./components/VideoChat/Videochat";
 import VideoCall from "./components/VideoChat/VideoCall";
-import CreateWorkspaceForm from './components/Dashboard/CreateWorkspaceForm';  // Import the new workspace form
+import CreateWorkspaceForm from './components/Dashboard/CreateWorkspaceForm';
 import WorkspaceDetail from "./components/Dashboard/WorkspaceDetails";
 import Chat from "./components/Chat/Chat";
 import ChatComponent from "./components/Chat/ChatComponent";
 import Workspace from "./components/Dashboard/Workspace";
 import Profile from "./components/Auth/Profile";
+import CreateChannelForm from "./components/Dashboard/CreateChannelForm";  // Import the channel creation form
+
 const App = () => {
   return (
     <Router>
@@ -26,17 +28,13 @@ const App = () => {
         <Route path="/task" element={<Taskboard />} />
         <Route path="/video" element={<VideoChat />} />
         <Route path="/videocall" element={<VideoCall />} />
-        <Route path="/workspace/create" element={<CreateWorkspaceForm />} /> {/* Route for creating workspace */}
+        <Route path="/workspace/create" element={<CreateWorkspaceForm />} />
         <Route path="/dashboard" element={<Workspace />} />
-          <Route path="/workspace/:workspaceName" element={<WorkspaceDetail />} />
-
-        <Route path="/pricing" element={<Pricing/>}/>
-        <Route path="/task" element={<Taskboard/>}/>
-        <Route path="/video" element={<VideoChat/>}/>
-        <Route path="/videocall" element={<VideoCall/>}/>
-        <Route path="/chat" element={<Chat/>}/>
-        <Route path="/livechat" element={<ChatComponent/>}/>
-        <Route path="/profile" element={<Profile/>}/>
+        <Route path="/workspace/:workspaceName" element={<WorkspaceDetail />} />
+        <Route path="/workspace/:workspaceName/create-channel" element={<CreateChannelForm />} /> {/* Route for creating new channel */}
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/livechat" element={<ChatComponent />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );

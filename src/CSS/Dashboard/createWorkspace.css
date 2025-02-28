@@ -1,65 +1,90 @@
+/* General Styles */
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f5f6fa;
+  margin: 0;
+  padding: 0;
+}
+
 .workspace-form-container {
   min-height: 100vh;
   background-color: #f5f6fa;
-  padding: 2rem;
   display: flex;
   justify-content: center;
+  align-items: center;
+  padding: 2rem;
 }
 
 .workspace-form {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 800px;
+  max-width: 960px;
+  font-size: 1rem;
+  color: #34495e;
 }
 
 .workspace-form h2 {
   color: #2c3e50;
   text-align: center;
-  margin-bottom: 2rem;
-  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  font-size: 2.5rem;
+  font-weight: 700;
 }
 
 .workspace-form h3 {
   color: #34495e;
   margin-bottom: 1rem;
-  font-size: 1.2rem;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.8rem;
 }
 
 .form-section {
-  margin-bottom: 2rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 4px;
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1.6rem;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
   color: #2c3e50;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .form-group input,
 .form-group textarea,
 .form-group select {
   width: 100%;
-  padding: 0.5rem;
+  padding: 1rem;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  background-color: #ffffff;
+  font-size: 1.1rem;
+  color: #34495e;
+  margin-bottom: 0.8rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #3498db;
+  outline: none;
 }
 
 .form-group textarea {
-  min-height: 100px;
+  min-height: 120px;
   resize: vertical;
 }
 
@@ -67,11 +92,12 @@
   background-color: #3498db;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.3s;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+  margin-top: 1rem;
 }
 
 .add-button:hover {
@@ -82,43 +108,54 @@
 .projects-list,
 .channels-list,
 .documents-list {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 }
 
 .member-item,
 .project-item,
 .channel-item,
 .document-item {
-  background-color: white;
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
-  border-radius: 4px;
+  background-color: #ffffff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
   border: 1px solid #ddd;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.member-item:hover,
+.project-item:hover,
+.channel-item:hover,
+.document-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .error-message {
   color: #e74c3c;
-  background-color: #fadbd8;
+  background-color: #f9d6d5;
   padding: 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
   text-align: center;
+  font-weight: 600;
 }
 
 .submit-button {
   background-color: #2ecc71;
   color: white;
   border: none;
-  padding: 1rem 2rem;
-  border-radius: 4px;
+  padding: 1rem 2.5rem;
+  border-radius: 8px;
   cursor: pointer;
   width: 100%;
-  font-size: 1rem;
-  font-weight: 500;
-  transition: background-color 0.3s;
+  font-size: 1.3rem;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  margin-top: 2rem;
 }
 
 .submit-button:hover {
@@ -127,14 +164,25 @@
 
 @media (max-width: 768px) {
   .workspace-form-container {
-    padding: 1rem;
+    padding: 1.5rem;
   }
 
   .workspace-form {
-    padding: 1rem;
+    padding: 1.8rem;
   }
 
   .form-section {
-    padding: 0.5rem;
+    padding: 1.2rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 1rem;
+  }
+
+  .submit-button {
+    font-size: 1.2rem;
+    padding: 1rem 2rem;
   }
 }
