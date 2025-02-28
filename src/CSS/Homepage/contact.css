@@ -1,0 +1,179 @@
+/* General Page Styling */
+.contact-page {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, #ffffff, #f2f2f2);
+    color: #333;
+    text-align: center;
+    padding: 4rem 2rem;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+/* Contact Form */
+.contact-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+}
+
+.contact-form {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+}
+
+.contact-form h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.contact-form input, .contact-form textarea {
+    width: 93%;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    transition: border 0.3s;
+}
+
+.contact-form input:focus, .contact-form textarea:focus {
+    border-color: #aaa;
+    outline: none;
+}
+
+.contact-form button {
+    background: #555;
+    color: white;
+    border: none;
+    padding: 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 8px;
+    width: 100%;
+    transition: 0.3s;
+}
+
+.contact-form button:hover {
+    background: #333;
+}
+
+/* Footer */
+.footer {
+    background-color: #ffffff;
+    color: #333;
+    text-align: center;
+    padding: 4rem 2rem;
+    border-top: 1px solid #ddd;
+    box-shadow: 0px -4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Footer Elements */
+.footer-brand, .footer-links, .footer-contact, .footer-newsletter, .footer-social {
+    flex: 1;
+    min-width: 250px;
+    text-align: left;
+}
+
+/* Footer Links */
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links ul li {
+    margin: 0.5rem 0;
+}
+
+.footer-links ul li a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-links ul li a:hover {
+    color: #000;
+}
+
+/* Newsletter */
+.footer-newsletter form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.footer-newsletter input {
+    flex: 1;
+    padding: 0.7rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.footer-newsletter button {
+    padding: 0.7rem 1.2rem;
+    background-color: #555;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.footer-newsletter button:hover {
+    background-color: #333;
+}
+
+/* Social Icons */
+.footer-social .social-icons a {
+    color: #666;
+    margin: 0 0.5rem;
+    font-size: 1.5rem;
+    transition: color 0.3s;
+}
+
+.footer-social .social-icons a:hover {
+    color: #000;
+}
+
+/* Footer Bottom */
+.footer-bottom {
+    padding-top: 1.5rem;
+    border-top: 1px solid #ddd;
+}
+
+.footer-bottom p {
+    font-size: 1rem;
+    color: #666;
+}

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import LoginPage from "./components/Auth/Loginpage";
 import SignupPage from "./components/Auth/Signuppage";
 import Homepage from "./components/Homepage/Homepage";
+import Contact from "./components/Homepage/Contact";
 import CanvasPage from "./components/Dashboard/Canvaspage";
 import Pricing from "./components/Auth/Pricing";
 import Taskboard from "./components/Task/Taskboard";
@@ -35,6 +36,8 @@ const App = () => {
         <Route path="/chat" element={<Chat />} />
         <Route path="/livechat" element={<ChatComponent />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/about" element={<Contact />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
     </Router>
   );
