@@ -1,17 +1,19 @@
 .workspace-detail-container {
-  display: flex;
+  max-width: 800px;
+  margin: auto;
   padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.sidebar {
-  width: 250px;
-  background-color: #f4f4f4;
-  padding: 20px;
-  border-radius: 8px;
+h1, h2 {
+  text-align: center;
 }
 
-.sidebar h2 {
-  margin-bottom: 20px;
+p {
+  text-align: center;
+  color: #555;
 }
 
 .channel-list {
@@ -19,48 +21,40 @@
   padding: 0;
 }
 
-.channel-list li {
-  margin: 10px 0;
+.channel-item {
+  background: #fff;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
-.channel-list a {
-  text-decoration: none;
-  color: #007bff;
-  font-weight: bold;
+.channel-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
-.channel-list a:hover {
-  text-decoration: underline;
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
-.create-channel-btn {
-  margin-top: 20px;
-  background-color: #007bff;
+.create-channel-button {
+  background: #007bff;
   color: white;
-  padding: 10px 20px;
+  padding: 10px;
   border: none;
   border-radius: 5px;
+  cursor: pointer;
 }
 
-.create-channel-btn a {
-  text-decoration: none;
-  color: white;
-}
-
-.create-channel-btn:hover {
-  background-color: #0056b3;
-}
-
-.workspace-main {
-  flex: 1;
-  margin-left: 20px;
-}
-
-.workspace-main h1 {
-  font-size: 2rem;
-}
-
-.workspace-main p {
-  font-size: 1rem;
-  color: #555;
+.create-channel-button:hover {
+  background: #0056b3;
 }

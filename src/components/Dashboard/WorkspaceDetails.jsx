@@ -1,83 +1,131 @@
-import React, { useState, useEffect } from "react";
+
+import "../../CSS/Dashboard/WorkspaceDetails.css";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Hash, Send, PlusCircle } from "lucide-react";
-import Sidebar from "./Sidebar";
+import axios from "axios";
 
-const ChatDashboard = () => {
+const WorkspaceDetail = () => {
   const { workspaceName } = useParams();
-
-  const [activeChannel, setActiveChannel] = useState("general");
+  const [workspace, setWorkspace] = useState(null);
   const [channels, setChannels] = useState([]);
-  const [newChannelName, setNewChannelName] = useState("");
+  const [users, setUsers] = useState([]);
+  const [selectedMembers, setSelectedMembers] = useState([]);
+  const [newChannel, setNewChannel] = useState({
+    name: "",
+    description: "",
+    members: [],
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/channels/${workspaceName}`)
-      .then(res => res.json())
-      .then(data => setChannels(data))
-      .catch(err => console.error("Error fetching channels:", err));
-  }, [workspaceName]);
-
-  const handleAddChannel = async () => {
-    if (!newChannelName.trim()) return;
-
-    const newChannel = {
-      name: newChannelName,
-      workspace: workspaceName,
-      createdBy: localStorage.email // Replace with actual user ID
+    const fetchWorkspace = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/workspaces/${workspaceName}`);
+        setWorkspace(res.data);
+        setChannels(res.data.chat.channels);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching workspace:", err);
+        setError("Failed to load workspace.");
+        setLoading(false);
+      }
     };
 
-    const response = await fetch("http://localhost:5000/api/channels", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newChannel),
-    });
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/users");
+        setUsers(res.data);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      }
+    };
 
-    if (response.ok) {
-      const createdChannel = await response.json();
-      setChannels(prev => [...prev, createdChannel]);
-      setNewChannelName("");
-    } else {
-      console.error("Failed to create channel");
+    fetchWorkspace();
+    fetchUsers();
+  }, [workspaceName]);
+
+  const handleCreateChannel = async () => {
+    if (!newChannel.name || !newChannel.description) {
+      alert("Please provide a channel name and description.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(`http://localhost:5000/api/workspaces/${workspaceName}/channels`, {
+        name: newChannel.name,
+        description: newChannel.description,
+        members: selectedMembers,
+      });
+
+      setChannels([...channels, response.data]);
+      setNewChannel({ name: "", description: "", members: [] });
+      setSelectedMembers([]);
+    } catch (error) {
+      console.error("Error creating channel:", error);
+      alert("Failed to create channel");
     }
   };
 
+  if (loading) return <p>Loading workspace details...</p>;
+  if (error) return <p className="error-message">{error}</p>;
+
   return (
-    <div className="dashboard-container">
-      <Sidebar
-        channels={channels}
-        activeChannel={activeChannel}
-        onChannelSelect={setActiveChannel}
-      />
+    <div className="workspace-detail-container">
+      {workspace && (
+        <>
+          <h1>{workspace.name}</h1>
+          <p>{workspace.description}</p>
 
-      <div className="main-content">
-        <div className="chat-header">
-          <div className="chat-header-title">
-            <Hash size={24} className="chat-header-icon" />
-            <span>{channels.find(c => c.id === activeChannel)?.name || "General"}</span>
+          <h2>Channels</h2>
+          {channels.length === 0 ? <p>No channels yet.</p> : (
+            <ul className="channel-list">
+              {channels.map((channel, index) => (
+                <li key={index} className="channel-item">
+                  <strong>{channel.name}</strong>: {channel.description}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <h2>Create a Channel</h2>
+          <div className="channel-form">
+            <input
+              type="text"
+              placeholder="Channel Name"
+              value={newChannel.name}
+              onChange={(e) => setNewChannel({ ...newChannel, name: e.target.value })}
+            />
+            <textarea
+              placeholder="Channel Description"
+              value={newChannel.description}
+              onChange={(e) => setNewChannel({ ...newChannel, description: e.target.value })}
+            ></textarea>
+
+            <h3>Add Members</h3>
+            <select
+              multiple
+              value={selectedMembers}
+              onChange={(e) =>
+                setSelectedMembers([...e.target.selectedOptions].map(option => option.value))
+              }
+            >
+              {users.map((user) => (
+                <option key={user._id} value={user._id}>
+                  {user.email}
+                </option>
+              ))}
+            </select>
+
+            <button className="create-channel-button" onClick={handleCreateChannel}>
+              Create Channel
+            </button>
           </div>
-        </div>
-
-        <h1>{workspaceName}</h1>
-
-        <div className="add-channel-container">
-          <input
-            type="text"
-            placeholder="New channel name..."
-            value={newChannelName}
-            onChange={(e) => setNewChannelName(e.target.value)}
-            className="channel-input"
-          />
-          <button onClick={handleAddChannel} className="add-channel-button">
-            <PlusCircle size={20} />
-          </button>
-        </div>
-
-        <div className="messages-container">
-          {/* Messages will be displayed here */}
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };
 
-export default ChatDashboard;
+export default WorkspaceDetail;

@@ -11,7 +11,6 @@ const TaskList = require('./models/TaskList');
 const { Server } = require('socket.io');
 const http = require('http');
 const Message = require('./models/Message');
-const Channel = require('./models/Channel')
 const nodemailer = require('nodemailer');
 const Task = require('./models/Task'); 
 
@@ -134,6 +133,17 @@ app.get('/api/current-user', async (req, res) => {
   } catch (error) {
     console.error('Error fetching user data:', error);
     res.status(500).json({ message: 'Failed to fetch user data' });
+  }
+});
+
+// Get all users (for member selection)
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await User.find({}, 'email _id');
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Failed to fetch users' });
   }
 });
 
@@ -380,6 +390,63 @@ app.get("/api/workspaces", async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch workspaces', error: error.message });
   }
 });
+
+// Get workspace by name
+app.get('/api/workspaces/:workspaceName', async (req, res) => {
+  try {
+    const workspace = await Workspace.findOne({ name: req.params.workspaceName })
+      .populate('createdBy', 'email name')
+      .populate('members.userId', 'email name')
+      .populate('chat.channels.members', 'email name');
+
+    if (!workspace) {
+      return res.status(404).json({ message: 'Workspace not found' });
+    }
+
+    res.json(workspace);
+  } catch (error) {
+    console.error('Error fetching workspace:', error);
+    res.status(500).json({ message: 'Failed to fetch workspace' });
+  }
+});
+
+// Create a new channel in a workspace
+app.post('/api/workspaces/:workspaceName/channels', async (req, res) => {
+  const { name, description, members } = req.body;
+
+  if (!name || !description) {
+    return res.status(400).json({ message: 'Name and description are required' });
+  }
+
+  try {
+    const workspace = await Workspace.findOne({ name: req.params.workspaceName });
+
+    if (!workspace) {
+      return res.status(404).json({ message: 'Workspace not found' });
+    }
+
+    // Validate member IDs
+    const validMembers = await User.find({ _id: { $in: members } });
+    const memberIds = validMembers.map(user => user._id);
+
+    const newChannel = {
+      name,
+      description,
+      members: memberIds,
+      messages: [],
+    };
+
+    workspace.chat.channels.push(newChannel);
+    await workspace.save();
+
+    res.status(201).json(newChannel);
+  } catch (error) {
+    console.error('Error creating channel:', error);
+    res.status(500).json({ message: 'Failed to create channel' });
+  }
+});
+
+
 
 
 app.get('/api/tasklists', async (req, res) => {

@@ -31,6 +31,7 @@ const workspaceSchema = new mongoose.Schema({
     channels: [
       {
         name: String,
+        description: String,
         members: [
           {
             type: mongoose.Schema.Types.ObjectId,
