@@ -283,10 +283,6 @@ app.post('/api/workspaces', async (req, res) => {
     name, 
     description, 
     members, 
-    projects, 
-    chat,
-    documentation,
-    notifications,
     createdBy 
   } = req.body;
 
@@ -306,22 +302,20 @@ app.post('/api/workspaces', async (req, res) => {
     if (members && members.length > 0) {
       const memberEmails = members.map(member => member.userId);
       const memberUsers = await User.find({ email: { $in: memberEmails } });
-      
-      // Create a map of email to user ObjectId for quick lookup
+
       const emailToUserMap = memberUsers.reduce((map, user) => {
         map[user.email] = user._id;
         return map;
       }, {});
 
-      // Process each member, replacing email with ObjectId
       processedMembers = members.map(member => {
         const userId = emailToUserMap[member.userId];
         if (!userId) {
           throw new Error(`User not found with email: ${member.userId}`);
         }
         return {
-          userId: userId,
-          role: member.role
+          userId,
+          role: member.role,
         };
       });
     }
@@ -331,26 +325,16 @@ app.post('/api/workspaces', async (req, res) => {
       description,
       createdBy: user._id,
       members: processedMembers,
-      projects: projects?.map(project => ({
-        name: project.name,
-        status: project.status,
-        createdAt: new Date()
-      })) || [],
       chat: {
-        channels: chat?.channels?.map(channel => ({
-          name: channel.name,
-          members: channel.members,
-          createdAt: new Date()
-        })) || []
+        channels: [
+          {
+            name: "default",
+            members: [user._id], // Add creator to default channel
+            messages: []
+          }
+        ],
       },
-      documentation: documentation?.map(doc => ({
-        title: doc.title,
-        content: doc.content,
-        createdBy: user._id,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })) || [],
-      notifications: notifications || []
+      notifications: [],
     });
 
     const savedWorkspace = await newWorkspace.save();
@@ -358,15 +342,11 @@ app.post('/api/workspaces', async (req, res) => {
     // Populate the response with user details for members
     const populatedWorkspace = await Workspace.findById(savedWorkspace._id)
       .populate('createdBy', 'email name')
-      .populate('members.userId', 'email name')
-      .populate('documentation.createdBy', 'email name');
+      .populate('members.userId', 'email name');
 
     res.status(201).json(populatedWorkspace);
   } catch (error) {
     console.error('Error creating workspace:', error);
-    if (error.message.includes('User not found with email')) {
-      return res.status(400).json({ message: error.message });
-    }
     res.status(500).json({ message: 'Error creating workspace', error: error.message });
   }
 });
@@ -388,12 +368,11 @@ app.get("/api/workspaces", async (req, res) => {
     const workspaces = await Workspace.find({
       $or: [
         { createdBy: user._id },
-        { 'members.userId': user._id }
-      ]
+        { 'members.userId': user._id },
+      ],
     })
     .populate('createdBy', 'email name')
-    .populate('members.userId', 'email name')
-    .populate('documentation.createdBy', 'email name');
+    .populate('members.userId', 'email name');
 
     res.status(200).json(workspaces);
   } catch (error) {
@@ -401,6 +380,7 @@ app.get("/api/workspaces", async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch workspaces', error: error.message });
   }
 });
+
 
 app.get('/api/tasklists', async (req, res) => {
   const {  userEmail } = req.query;

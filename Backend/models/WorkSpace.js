@@ -27,20 +27,6 @@ const workspaceSchema = new mongoose.Schema({
       },
     },
   ],
-  projects: [
-    {
-      projectId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Project',
-      },
-      name: String,
-      status: {
-        type: String,
-        enum: ['active', 'completed', 'on-hold'], 
-        default: 'active',
-      },
-    },
-  ],
   chat: {
     channels: [
       {
@@ -67,24 +53,6 @@ const workspaceSchema = new mongoose.Schema({
       },
     ],
   },
-  documentation: [
-    {
-      title: String,
-      content: String,
-      createdAt: {
-        type: Date,
-        default: Date.now,
-      },
-      updatedAt: {
-        type: Date,
-        default: Date.now,
-      },
-      createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-      },
-    },
-  ],
   notifications: [
     {
       type: {
