@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { FiPlusCircle } from "react-icons/fi";
 import "../../CSS/Dashboard/Workspace.css";
 
 const Workspace = () => {
@@ -55,17 +56,11 @@ const Workspace = () => {
             <div className="workspace-card" key={workspace._id}>
               <h2>{workspace.name}</h2>
               <p>
-                Created by:{" "}
-                {workspace.createdBy
-                  ? `${workspace.createdBy.email}`
-                  : "Unknown"}
+                Created by: {workspace.createdBy ? `${workspace.createdBy.email}` : "Unknown"}
               </p>
               <p>
-                Members:{" "}
-                {workspace.members.length > 0
-                  ? workspace.members
-                      .map((member) => `${member.userId.email}`)
-                      .join(", ")
+                Members: {workspace.members.length > 0
+                  ? workspace.members.map((member) => `${member.userId.email}`).join(", ")
                   : "No members"}
               </p>
               <button
@@ -80,6 +75,12 @@ const Workspace = () => {
       ) : (
         <p>No workspaces found.</p>
       )}
+
+      {/* Floating Create Workspace Button */}
+      <button className="workspace-btn1" title="Create Workspace">
+        <FiPlusCircle className="workspace-btn-icon" />
+        <Link to="/workspace/create" className="workspace-btn-link">Create Workspace</Link>
+      </button>
     </div>
   );
 };
