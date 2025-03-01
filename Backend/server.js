@@ -2,17 +2,17 @@ const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const jwt = require("jsonwebtoken");
-require('dotenv').config(); 
-const Workspace = require("./models/WorkSpace"); 
+require('dotenv').config();
+const Workspace = require("./models/WorkSpace");
 
-require('dotenv').config(); 
+require('dotenv').config();
 const User = require("./models/User")
-const TaskList = require('./models/TaskList');  
+const TaskList = require('./models/TaskList');
 const { Server } = require('socket.io');
 const http = require('http');
 const Message = require('./models/Message');
 const nodemailer = require('nodemailer');
-const Task = require('./models/Task'); 
+const Task = require('./models/Task');
 
 const URI = process.env.MONGO_URI || 'mongodb+srv://YashGabani:Yash9182@cluster0.n77u6.mongodb.net/Icollab?retryWrites=true&w=majority&appName=Cluster0';
 
@@ -83,8 +83,8 @@ app.post("/api/login", async (req, res) => {
     }
 
     if (user.authType !== 'local') {
-      return res.status(400).json({ 
-        message: "This email is registered with Google. Please use Google Sign In." 
+      return res.status(400).json({
+        message: "This email is registered with Google. Please use Google Sign In."
       });
     }
 
@@ -199,11 +199,11 @@ app.post('/api/google-signup', async (req, res) => {
 
     if (user) {
       if (user.authType === 'local') {
-        return res.status(400).json({ 
-          message: 'Email already exists with password login. Please use regular login.' 
+        return res.status(400).json({
+          message: 'Email already exists with password login. Please use regular login.'
         });
       }
-      
+
       const token = jwt.sign(
         { id: user._id, email: user.email },
         process.env.JWT_SECRET || "yash1234",
@@ -251,14 +251,14 @@ app.post('/api/google-login', async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({ 
-        message: 'User not found. Please sign up first.' 
+      return res.status(404).json({
+        message: 'User not found. Please sign up first.'
       });
     }
 
     if (user.authType !== 'google') {
-      return res.status(400).json({ 
-        message: 'This email is registered with password login. Please use regular login.' 
+      return res.status(400).json({
+        message: 'This email is registered with password login. Please use regular login.'
       });
     }
 
@@ -289,11 +289,11 @@ app.post('/api/google-login', async (req, res) => {
 
 // Workspace Routes
 app.post('/api/workspaces', async (req, res) => {
-  const { 
-    name, 
-    description, 
-    members, 
-    createdBy 
+  const {
+    name,
+    description,
+    members,
+    createdBy
   } = req.body;
 
   if (!name || !description || !createdBy) {
@@ -381,8 +381,8 @@ app.get("/api/workspaces", async (req, res) => {
         { 'members.userId': user._id },
       ],
     })
-    .populate('createdBy', 'email name')
-    .populate('members.userId', 'email name');
+      .populate('createdBy', 'email name')
+      .populate('members.userId', 'email name');
 
     res.status(200).json(workspaces);
   } catch (error) {
@@ -450,112 +450,112 @@ app.post('/api/workspaces/:workspaceName/channels', async (req, res) => {
 
 
 app.get('/api/tasklists', async (req, res) => {
-  const {  userEmail } = req.query;
+  const { userEmail } = req.query;
   const user = await User.findOne({ email: userEmail });
   try {
-    const taskLists = await TaskList.find({createdBy:user._id});  
-    res.json(taskLists);  
+    const taskLists = await TaskList.find({ createdBy: user._id });
+    res.json(taskLists);
   } catch (error) {
     console.error('Error fetching task lists:', error);
     res.status(500).json({ message: 'Failed to fetch task lists' });
   }
 });
 app.post('/api/tasklists', async (req, res) => {
-const { title, cards ,createdBy} = req.body;  
-const create = await User.findOne({ email: createdBy });
-if (!title || !cards || !create) {
-  return res.status(400).json({ message: 'Title and cards are required' });
-}
-try {
-  const newTaskList = new TaskList({
-    name:title,
-    createdBy:create._id,
-    createdAt: Date.now(),
-    tasks:cards, 
-  });
-  const savedList = await newTaskList.save();  
-  res.status(201).json(savedList);  
-} catch (error) {
-  console.error('Error adding new task list:', error);
-  res.status(500).json({ message: 'Failed to add a new task list' });
-}
+  const { title, cards, createdBy } = req.body;
+  const create = await User.findOne({ email: createdBy });
+  if (!title || !cards || !create) {
+    return res.status(400).json({ message: 'Title and cards are required' });
+  }
+  try {
+    const newTaskList = new TaskList({
+      name: title,
+      createdBy: create._id,
+      createdAt: Date.now(),
+      tasks: cards,
+    });
+    const savedList = await newTaskList.save();
+    res.status(201).json(savedList);
+  } catch (error) {
+    console.error('Error adding new task list:', error);
+    res.status(500).json({ message: 'Failed to add a new task list' });
+  }
 });
 app.get('/api/tasks', async (req, res) => {
-const { taskListName, userEmail } = req.query;
-console.log(req.query)
-try {
-  const taskList = await TaskList.findOne({ name: taskListName });
-  if (!taskList) {
-    return res.status(400).json({ error: 'TaskList not found' });
+  const { taskListName, userEmail } = req.query;
+  console.log(req.query)
+  try {
+    const taskList = await TaskList.findOne({ name: taskListName });
+    if (!taskList) {
+      return res.status(400).json({ error: 'TaskList not found' });
+    }
+    const user = await User.findOne({ email: userEmail });
+    if (!user) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+    console.log(user, taskList)
+    const tasks = await Task.find({
+      createdBy: user._id,
+      taskListId: taskList._id,
+    })
+    console.log(tasks)
+    res.status(200).json(tasks);
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    res.status(500).json({ error: 'Failed to fetch tasks' });
   }
-  const user = await User.findOne({ email: userEmail });
-  if (!user) {
-    return res.status(400).json({ error: 'User not found' });
-  }
-console.log(user,taskList)
-  const tasks = await Task.find({
-    createdBy: user._id,
-    taskListId: taskList._id,
-  })
-console.log(tasks)
-  res.status(200).json(tasks);
-} catch (error) {
-  console.error('Error fetching tasks:', error);
-  res.status(500).json({ error: 'Failed to fetch tasks' });
-}
 });
 app.post('/api/tasks', async (req, res) => {
-const {title,description,priority,createdBy,Tasklist } = req.body;
-try {
-  // Find the TaskList by its name
-  console.log(req.body)
-  const user = await User.findOne({ email: createdBy });
-  if (!user) {
-    return res.status(400).json({ error: 'User not found' });
+  const { title, description, priority, createdBy, Tasklist } = req.body;
+  try {
+    // Find the TaskList by its name
+    console.log(req.body)
+    const user = await User.findOne({ email: createdBy });
+    if (!user) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+    const taskList = await TaskList.findOne({ name: Tasklist, createdBy: user._id });
+    console.log(taskList)
+    if (!taskList) {
+      return res.status(400).json({ error: 'TaskList not found' });
+    }
+    // Find the User by their email
+
+    // Check if the task with the same title already exists in the TaskList for the given user
+    const existingTask = await Task.findOne({
+      createdBy: user._id,
+      taskListId: taskList._id,
+      title,
+    });
+    if (existingTask) {
+      return res.status(400).json({ error: 'A task with this title already exists in this task list' });
+    }
+    // Create and save the new task
+    const newTask = new Task({
+      title,
+      description,
+      assignedTo: [],
+      priority,
+      labels: [],
+      checklist: [],
+      taskListId: taskList._id, // Tied to the task list
+      createdBy: user._id, // User creating the task
+    });
+    await newTask.save();
+    taskList.tasks.push(newTask._id);
+    await taskList.save();
+
+    res.status(201).json(newTask);
+  } catch (error) {
+    console.error('Error creating task:', error);
+    res.status(500).json({ error: 'Failed to create task' });
   }
-  const taskList = await TaskList.findOne({ name: Tasklist , createdBy : user._id });
-  console.log(taskList)
-  if (!taskList) {
-    return res.status(400).json({ error: 'TaskList not found' });
-  }
-  // Find the User by their email
-  
-  // Check if the task with the same title already exists in the TaskList for the given user
-  const existingTask = await Task.findOne({
-    createdBy: user._id,
-    taskListId: taskList._id,
-    title,
-  });
-  if (existingTask) {
-    return res.status(400).json({ error: 'A task with this title already exists in this task list' });
-  }
-  // Create and save the new task
-  const newTask = new Task({
-    title,
-    description,
-    assignedTo:[],
-    priority,
-    labels:[],
-    checklist:[],
-    taskListId: taskList._id, // Tied to the task list
-    createdBy: user._id, // User creating the task
-  });
-  await newTask.save();
-  taskList.tasks.push(newTask._id);
-  await taskList.save();
-  
-  res.status(201).json(newTask);
-} catch (error) {
-  console.error('Error creating task:', error);
-  res.status(500).json({ error: 'Failed to create task' });
-}
 });
 
 app.get("/api/channels/:workspaceName", async (req, res) => {
   try {
     const wname = req.params.workspacename;
-    const wspace = Workspace.find({name:wname});
-    const channels = await Channel.find({ workspace : wspace._id });
+    const wspace = Workspace.find({ name: wname });
+    const channels = await Channel.find({ workspace: wspace._id });
     res.json(channels);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -570,11 +570,11 @@ app.post("/api/channels", async (req, res) => {
     }
     const user = await User.findOne({ email: createdBy });
     console.log(user)
-    const uid= user._id;
-    const wspace = Workspace.find({name:workspace});
+    const uid = user._id;
+    const wspace = Workspace.find({ name: workspace });
     console.log(wspace)
-    const wid=wspace._id;
-    const newChannel = new Channel({name: name,workspace: wid ,createdBy: uid });
+    const wid = wspace._id;
+    const newChannel = new Channel({ name: name, workspace: wid, createdBy: uid });
     await newChannel.save();
     res.status(201).json(newChannel);
   } catch (err) {
@@ -644,8 +644,8 @@ app.get('/api/messages/:userEmail', async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((page - 1) * parseInt(limit))
-      .sort({ createdAt: 1 }) 
-      .lean(); 
+      .sort({ createdAt: 1 })
+      .lean();
 
     res.json(messages);
   } catch (error) {

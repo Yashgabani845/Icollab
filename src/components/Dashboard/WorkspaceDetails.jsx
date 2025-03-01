@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import "../../CSS/Dashboard/WorkspaceDetails.css";
 import axios from "axios";
+import ChannelChat from "../../components/Chat/ChannelChat";
 
 const WorkspaceDetail = () => {
   const { workspaceName } = useParams();
   const [workspace, setWorkspace] = useState(null);
   const [channels, setChannels] = useState([]);
+  const [selectedChannel, setSelectedChannel] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -41,10 +43,16 @@ const WorkspaceDetail = () => {
         {/* Sidebar for Channels */}
         <div className="sidebar">
           <h3>Channels</h3>
-          {channels.length === 0 ? <p>No channels yet.</p> : (
+          {channels.length === 0 ? (
+            <p>No channels yet.</p>
+          ) : (
             <ul className="channel-list">
-              {channels.map((channel, index) => (
-                <li key={index} className="channel-item">
+              {channels.map((channel) => (
+                <li
+                  key={channel._id}
+                  className={`channel-item ${selectedChannel?._id === channel._id ? "active" : ""}`}
+                  onClick={() => setSelectedChannel(channel)}
+                >
                   <strong>{channel.name}</strong>: {channel.description}
                 </li>
               ))}
@@ -57,8 +65,15 @@ const WorkspaceDetail = () => {
 
         {/* Main Content Area */}
         <div className="main-content">
-          <h1>{workspace?.name}</h1>
-          <p>{workspace?.description}</p>
+          {selectedChannel ? (
+            <ChannelChat channel={selectedChannel} />
+          ) : (
+            <>
+              <h1>{workspace?.name}</h1>
+              <p>{workspace?.description}</p>
+              <p>Select a channel to start chatting.</p>
+            </>
+          )}
         </div>
       </div>
     </div>
