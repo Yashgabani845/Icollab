@@ -8,7 +8,7 @@ const Workspace = require("./models/WorkSpace");
 require('dotenv').config();
 const User = require("./models/User")
 const TaskList = require('./models/TaskList');
-const { Server } = require('socket.io');
+// const { Server } = require('socket.io');
 const http = require('http');
 const Message = require('./models/Message');
 const nodemailer = require('nodemailer');
@@ -28,10 +28,198 @@ const connectDB = async () => {
 
 connectDB();
 
+// const server = http.createServer(app);
+// const io = new Server(server, { cors: { origin: '*' } });
+// Add this to your server.js or index.js file
+const socketIo = require('socket.io');
+
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
+app.use(cors({
+  origin: 'http://localhost:3000', // Your React app URL
+  credentials: true
+}));
 
+// Configure Socket.io with CORS
+const io = socketIo(server, {
+  cors: { 
+    origin: 'http://localhost:3000',
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
+// Socket.io connection handling
+io.on('connection', (socket) => {
+  console.log('New client connected');
+  
+  // Join a specific channel room
+  socket.on('joinChannel', ({ channelId, workspaceName }) => {
+    const roomName = `${workspaceName}-${channelId}`;
+    socket.join(roomName);
+    console.log(`User joined room: ${roomName}`);
+  });
+  
+  // Leave a channel room
+  socket.on('leaveChannel', ({ channelId, workspaceName }) => {
+    const roomName = `${workspaceName}-${channelId}`;
+    socket.leave(roomName);
+    console.log(`User left room: ${roomName}`);
+  });
+  
+  // Handle new messages
+  socket.on('sendMessage', async ({ channelId, workspaceName, message }) => {
+    try {
+      const { senderId, content, senderName } = message;
+      const roomName = `${workspaceName}-${channelId}`;
+      
+      // Find the workspace and channel
+      const workspace = await Workspace.findOne({ name: workspaceName });
+      if (!workspace) {
+        return socket.emit('error', { message: "Workspace not found" });
+      }
+      
+      const channel = workspace.chat.channels.id(channelId);
+      if (!channel) {
+        return socket.emit('error', { message: "Channel not found" });
+      }
+      
+      // Find the user
+      const user = await User.findOne({ email: senderId });
+      if (!user) {
+        return socket.emit('error', { message: "User not found" });
+      }
+      
+      // Create and save the new message
+      const newMessage = {
+        sender: user._id,
+        content,
+        timestamp: new Date(),
+      };
+      
+      channel.messages.push(newMessage);
+      await workspace.save();
+      
+      // Get the populated message to broadcast
+      const updatedWorkspace = await Workspace.findOne({ name: workspaceName })
+        .populate({
+          path: 'chat.channels.messages.sender',
+          select: 'name email _id'
+        });
+      
+      const updatedChannel = updatedWorkspace.chat.channels.id(channelId);
+      const populatedMessage = updatedChannel.messages[updatedChannel.messages.length - 1];
+      
+      // Broadcast the message to everyone in the channel
+      io.to(roomName).emit('newMessage', populatedMessage);
+    } catch (error) {
+      console.error("Error sending message via socket:", error);
+      socket.emit('error', { message: "Failed to send message" });
+    }
+  });
+  
+  // Handle typing events
+  socket.on('typing', ({ channelId, workspaceName, userId, isTyping }) => {
+    console.log(`User Typing Event: ${userId} - Typing: ${isTyping}`);
+
+    const roomName = `${workspaceName}-${channelId}`;
+    // Broadcast to everyone except the sender
+    socket.to(roomName).emit('userTyping', { userId, isTyping });
+  });
+  
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
+});
+
+// Update your API routes for messages
+app.get('/api/workspaces/:workspaceName/channels/:channelId/messages', async (req, res) => {
+  try {
+    const workspace = await Workspace.findOne({ name: req.params.workspaceName })
+      .populate({
+        path: 'chat.channels.messages.sender',
+        select: 'name email _id'
+      });
+
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    const channel = workspace.chat.channels.id(req.params.channelId);
+
+    if (!channel) {
+      return res.status(404).json({ message: "Channel not found" });
+    }
+
+    res.status(200).json(channel.messages);
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).json({ message: "Failed to retrieve messages" });
+  }
+});
+
+// POST endpoint still needed for non-socket clients or fallback
+app.post('/api/workspaces/:workspaceName/channels/:channelId/messages', async (req, res) => {
+  const { senderId, content } = req.body;
+  
+  if (!senderId || !content) {
+    return res.status(400).json({ message: "Sender ID and message content are required" });
+  }
+
+  try {
+    const workspace = await Workspace.findOne({ name: req.params.workspaceName });
+
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    const channel = workspace.chat.channels.id(req.params.channelId);
+
+    if (!channel) {
+      return res.status(404).json({ message: "Channel not found" });
+    }
+
+    const user = await User.findOne({ email: senderId });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const newMessage = {
+      sender: user._id,
+      content,
+      timestamp: new Date(),
+    };
+
+    channel.messages.push(newMessage);
+    await workspace.save();
+    
+    // Get the populated message to return
+    const updatedWorkspace = await Workspace.findOne({ name: req.params.workspaceName })
+      .populate({
+        path: 'chat.channels.messages.sender',
+        select: 'name email _id'
+      });
+    
+    const updatedChannel = updatedWorkspace.chat.channels.id(req.params.channelId);
+    const populatedMessage = updatedChannel.messages[updatedChannel.messages.length - 1];
+
+    // Emit the new message to all clients in the channel
+    const roomName = `${req.params.workspaceName}-${req.params.channelId}`;
+    io.to(roomName).emit('newMessage', populatedMessage);
+
+    res.status(201).json(populatedMessage);
+  } catch (error) {
+    console.error("Error sending message:", error);
+    res.status(500).json({ message: "Failed to send message" });
+  }
+});
+
+// Update your server.listen to use the http server instead of app
+const port =  5001;
+server.listen(port, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 app.use(cors());
 app.use(express.json());
 
@@ -394,21 +582,103 @@ app.get("/api/workspaces", async (req, res) => {
 // Get workspace by name
 app.get('/api/workspaces/:workspaceName', async (req, res) => {
   try {
-    const workspace = await Workspace.findOne({ name: req.params.workspaceName })
-      .populate('createdBy', 'email name')
-      .populate('members.userId', 'email name')
-      .populate('chat.channels.members', 'email name');
+    const userId = req.query.userId; // Get logged-in user's email from query params
 
-    if (!workspace) {
-      return res.status(404).json({ message: 'Workspace not found' });
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
     }
 
-    res.json(workspace);
+    // Find user by email and get their ID
+    const user = await User.findOne({ email: userId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const uid = user._id.toString();
+
+    // Find the workspace by name
+    const workspace = await Workspace.findOne({ name: req.params.workspaceName });
+
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    // Filter channels where the user is a member
+    const filteredChannels = workspace.chat.channels.filter(channel =>
+      channel.members.some(member => member._id.toString() === uid)
+    );
+
+    res.json({ ...workspace.toObject(), chat: { channels:  workspace.chat.channels } });
   } catch (error) {
-    console.error('Error fetching workspace:', error);
-    res.status(500).json({ message: 'Failed to fetch workspace' });
+    console.error("Error fetching workspace:", error);
+    res.status(500).json({ message: "Failed to fetch workspace" });
   }
 });
+
+app.post('/api/workspaces/:workspaceName/channels/:channelId/messages', async (req, res) => {
+  const { senderId, content } = req.body;
+  console.log(senderId, content)
+  if (!senderId || !content) {
+    return res.status(400).json({ message: "Sender ID and message content are required" });
+  }
+
+  try {
+    const workspace = await Workspace.findOne({ name: req.params.workspaceName });
+
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    const channel = workspace.chat.channels.id(req.params.channelId);
+
+    if (!channel) {
+      return res.status(404).json({ message: "Channel not found" });
+    }
+
+    const user = await User.findOne({ email: senderId });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    
+
+    const newMessage = {
+      sender: user._id,
+      content,
+      timestamp: new Date(),
+    };
+
+    channel.messages.push(newMessage);
+    await workspace.save();
+
+    res.status(201).json(newMessage);
+  } catch (error) {
+    console.error("Error sending message:", error);
+    res.status(500).json({ message: "Failed to send message" });
+  }
+});
+
+app.get('/api/workspaces/:workspaceName/channels/:channelId/messages', async (req, res) => {
+  try {
+    const workspace = await Workspace.findOne({ name: req.params.workspaceName });
+
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    const channel = workspace.chat.channels.id(req.params.channelId);
+
+    if (!channel) {
+      return res.status(404).json({ message: "Channel not found" });
+    }
+
+    res.status(200).json(channel.messages);
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).json({ message: "Failed to retrieve messages" });
+  }
+});
+
 
 // Create a new channel in a workspace
 app.post('/api/workspaces/:workspaceName/channels', async (req, res) => {
@@ -586,48 +856,48 @@ app.post("/api/channels", async (req, res) => {
 
 
 
-io.on('connection', (socket) => {
-  // Store user email when they connect
-  socket.on('register', (email) => {
-    socket.email = email;
-    socket.join(email); // Join a room with their email
-  });
+// io.on('connection', (socket) => {
+//   // Store user email when they connect
+//   socket.on('register', (email) => {
+//     socket.email = email;
+//     socket.join(email); // Join a room with their email
+//   });
 
-  // Handle new message
-  socket.on('sendMessage', async (data) => {
-    try {
-      const { content, receiverEmail, senderEmail, messageType = 'text' } = data;
+//   // Handle new message
+//   socket.on('sendMessage', async (data) => {
+//     try {
+//       const { content, receiverEmail, senderEmail, messageType = 'text' } = data;
 
-      // Save message to database
-      const newMessage = new Message({
-        content,
-        sender: senderEmail,
-        receiver: receiverEmail,
-        messageType,
-        isRead: false,
-      });
+//       // Save message to database
+//       const newMessage = new Message({
+//         content,
+//         sender: senderEmail,
+//         receiver: receiverEmail,
+//         messageType,
+//         isRead: false,
+//       });
 
-      await newMessage.save();
+//       await newMessage.save();
 
-      // Emit the message to both sender and receiver
-      io.to(receiverEmail).emit('newMessage', newMessage);
-      io.to(senderEmail).emit('newMessage', newMessage);
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
-  });
-  socket.on('markAsRead', async (senderEmail) => {
-    try {
-      await Message.updateMany(
-        { sender: senderEmail, receiver: socket.email, isRead: false },
-        { isRead: true }
-      );
-      io.to(senderEmail).emit('messagesRead', socket.email);
-    } catch (error) {
-      console.error('Error marking messages as read:', error);
-    }
-  });
-});
+//       // Emit the message to both sender and receiver
+//       io.to(receiverEmail).emit('newMessage', newMessage);
+//       io.to(senderEmail).emit('newMessage', newMessage);
+//     } catch (error) {
+//       console.error('Error sending message:', error);
+//     }
+//   });
+//   socket.on('markAsRead', async (senderEmail) => {
+//     try {
+//       await Message.updateMany(
+//         { sender: senderEmail, receiver: socket.email, isRead: false },
+//         { isRead: true }
+//       );
+//       io.to(senderEmail).emit('messagesRead', socket.email);
+//     } catch (error) {
+//       console.error('Error marking messages as read:', error);
+//     }
+//   });
+// });
 
 
 app.get('/api/messages/:userEmail', async (req, res) => {
@@ -682,6 +952,6 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-server.listen(5001, () => {
-  console.log('Server running on http://localhost:5001');
-});
+// server.listen(5001, () => {
+//   console.log('Server running on http://localhost:5001');
+// });

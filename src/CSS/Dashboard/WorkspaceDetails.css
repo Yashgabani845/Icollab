@@ -4,13 +4,6 @@
   height: 100vh;
 }
 
-.navbar {
-  background-color: #2c3e50;
-  color: white;
-  padding: 15px;
-  font-size: 20px;
-  font-weight: bold;
-}
 
 .workspace-content {
   display: flex;

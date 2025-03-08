@@ -11,7 +11,7 @@ const UserSchema = new mongoose.Schema(
     workspaces: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' }],
     role: { type: String, enum: ['admin', 'member'], default: 'member' },
     lastSeen: { type: Date },
-    googleId: { type: String }, // For Google auth users
+    googleId: { type: String },
     authType: { type: String, enum: ['local', 'google'], default: 'local' }
   },
   { timestamps: true }

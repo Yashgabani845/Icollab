@@ -15,7 +15,11 @@ const WorkspaceDetail = () => {
   useEffect(() => {
     const fetchWorkspace = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/workspaces/${workspaceName}`);
+        const userId = localStorage.getItem("email"); // Retrieve userId from local storage (or use a global state)
+
+        const res = await axios.get(`http://localhost:5000/api/workspaces/${workspaceName}`, {
+          params: { userId }, // Send userId in query parameters
+        });
         setWorkspace(res.data);
         setChannels(res.data.chat.channels);
         setLoading(false);
@@ -66,7 +70,7 @@ const WorkspaceDetail = () => {
         {/* Main Content Area */}
         <div className="main-content">
           {selectedChannel ? (
-            <ChannelChat channel={selectedChannel} />
+            <ChannelChat channel={selectedChannel} wname={workspaceName} />
           ) : (
             <>
               <h1>{workspace?.name}</h1>

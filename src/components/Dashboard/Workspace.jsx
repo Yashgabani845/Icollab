@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { FiPlusCircle } from "react-icons/fi";
 import "../../CSS/Dashboard/Workspace.css";
 
 const Workspace = () => {
@@ -76,9 +75,7 @@ const Workspace = () => {
         <p>No workspaces found.</p>
       )}
 
-      {/* Floating Create Workspace Button */}
       <button className="workspace-btn1" title="Create Workspace">
-        <FiPlusCircle className="workspace-btn-icon" />
         <Link to="/workspace/create" className="workspace-btn-link">Create Workspace</Link>
       </button>
     </div>
