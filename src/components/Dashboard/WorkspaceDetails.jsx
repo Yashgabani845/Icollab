@@ -62,7 +62,7 @@ const WorkspaceDetail = () => {
               ))}
             </ul>
           )}
-          <Link to={`/workspace/${workspaceName}/create-channel`} className="create-channel-btn">
+          <Link to={`/workspace/${workspaceName}/create-channel`} className="create-channel-btn2">
             + Create Channel
           </Link>
         </div>

@@ -1,7 +1,7 @@
 .workspace-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100px;
 }
 
 
@@ -12,8 +12,8 @@
 
 .sidebar {
   width: 250px;
-  background-color: #34495e;
-  color: white;
+  background-color: #d3d3d3;
+  color: rgb(0, 0, 0);
   padding: 20px;
 }
 
@@ -24,7 +24,7 @@
 
 .channel-item {
   padding: 10px;
-  background: #2c3e50;
+  background: #949494;
   margin: 5px 0;
   border-radius: 5px;
   cursor: pointer;
@@ -32,19 +32,19 @@
 }
 
 .channel-item:hover {
-  background: #1abc9c;
+  background: #4b4f4f;
 }
 
 .channel-item.active {
-  background: #1abc9c;
+  background: #353535;
   color: white;
 }
 
-.create-channel-btn {
+.create-channel-btn2 {
   display: block;
   margin-top: 15px;
   padding: 10px;
-  background-color: #1abc9c;
+  background-color: #4b4f4f;
   color: white;
   text-align: center;
   border-radius: 5px;
@@ -53,7 +53,7 @@
 
 .main-content {
   flex: 1;
-  padding: 20px;
+  padding: 0px;
   background: #f4f4f4;
   display: flex;
   flex-direction: column;
