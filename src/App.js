@@ -17,12 +17,14 @@ import Workspace from "./components/Dashboard/Workspace";
 import Profile from "./components/Auth/Profile";
 import CreateChannel from "./components/Dashboard/CreateChannel";
 import ChannelChat from "./components/Chat/ChannelChat"; // Import new channel chat component
+import Mesh from "./components/VideoChat/Mesh";
 
 const App = () => {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Homepage />} />
+        <Route path="/mesh" element={<Mesh />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/canvas" element={<CanvasPage />} />

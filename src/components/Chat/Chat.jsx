@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import ChatComponent from './ChatComponent';
-import "../../CSS/chating.css";
 
 const Chat = () => {
   const [myEmail, setMyEmail] = useState(localStorage.email);

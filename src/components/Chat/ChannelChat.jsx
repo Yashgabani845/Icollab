@@ -226,15 +226,37 @@ const ChannelChat = ({ channel, wname }) => {
 
         <div ref={messagesEndRef} />
       </div>
-      <div className="message-input">
-        <input
-          type="text"
-          placeholder="Type a message..."
-          value={newMessage}
-          onChange={handleTyping}
-          onKeyPress={handleKeyPress}
-        />
-        <button onClick={sendMessage}>Send</button>
+      <div className="chat-input-container">
+        <div className="chat-toolbar">
+          <button className="toolbar-button" title="Attach File">
+            📎 File
+          </button>
+          <button className="toolbar-button" title="Insert Image">
+            🖼️ Image
+          </button>
+          <button className="toolbar-button" title="Insert Emoji">
+            😊 Emoji
+          </button>
+          <button className="toolbar-button" title="Format Text">
+            📝 Format
+          </button>
+          <button className="toolbar-button" title="Record Audio">
+            🎤 Audio
+          </button>
+        </div>
+        <div className="chat-input-row">
+          <input
+            type="text"
+            className="chat-input"
+            placeholder="Type a message..."
+            value={newMessage}
+            onChange={handleTyping}
+            onKeyPress={handleKeyPress}
+          />
+          <button className="chat-send-button" onClick={sendMessage}>
+            Send
+          </button>
+        </div>
       </div>
     </div>
   )
