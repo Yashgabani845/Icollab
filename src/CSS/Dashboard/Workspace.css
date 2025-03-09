@@ -1,9 +1,9 @@
 /* Workspace Container */
 .workspace-container {
   font-family: 'Poppins', sans-serif;
-  padding: 40px;
+  padding: 0px;
   background-color: #f4f4f9;
-  min-height: 100vh;
+  min-height: 87vh;
 }
 
 /* Title Styling */
