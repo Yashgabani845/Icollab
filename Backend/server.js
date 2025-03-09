@@ -4,7 +4,8 @@ const cors = require('cors');
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const Workspace = require("./models/WorkSpace");
-
+const Project = require('./models/Project');
+const axios = require('axios');
 require('dotenv').config();
 const User = require("./models/User")
 const TaskList = require('./models/TaskList');
@@ -899,6 +900,153 @@ app.post("/api/channels", async (req, res) => {
 //   });
 // });
 
+app.post('/api/projects', async (req, res) => {
+  try {
+    const { repositoryUrl ,workspaceId,addedBy} = req.body;
+    console.log(repositoryUrl ,workspaceId,addedBy)
+        // Validate URL format
+    if (!repositoryUrl.match(/^https:\/\/github\.com\/[^/]+\/[^/]+$/)) {
+      return res.status(400).json({ message: 'Invalid GitHub repository URL' });
+    }
+    
+    // Extract owner and repo name from URL
+    const urlParts = repositoryUrl.split('/');
+    const owner = urlParts[urlParts.length - 2];
+    const repoName = urlParts[urlParts.length - 1];
+    
+    // Check if project already exists
+    const existingProject = await Project.findOne({ repositoryUrl });
+    if (existingProject) {
+      return res.status(400).json({ message: 'Project already exists' });
+    }
+    
+    // Fetch repository data from GitHub API
+    const repoResponse = await axios.get(`https://api.github.com/repos/${owner}/${repoName}`);
+    const repoData = repoResponse.data;
+    
+    // Fetch pull requests
+    const prResponse = await axios.get(`https://api.github.com/repos/${owner}/${repoName}/pulls?state=all&per_page=100`);
+    const pullRequests = prResponse.data.map(pr => ({
+      id: pr.id,
+      title: pr.title,
+      url: pr.html_url,
+      state: pr.state === 'closed' && pr.merged_at ? 'merged' : pr.state,
+      createdAt: pr.created_at,
+      updatedAt: pr.updated_at,
+      repository: repositoryUrl
+    }));
+    
+    // Fetch issues
+    const issueResponse = await axios.get(`https://api.github.com/repos/${owner}/${repoName}/issues?state=all&per_page=100`);
+    const issues = issueResponse.data
+      .filter(issue => !issue.pull_request) // Filter out pull requests that appear in issues list
+      .map(issue => ({
+        id: issue.id,
+        title: issue.title,
+        url: issue.html_url,
+        state: issue.state,
+        createdAt: issue.created_at,
+        updatedAt: issue.updated_at,
+        repository: repositoryUrl
+      }));
+    const usera = await User.findOne({ email: addedBy });
+    console.log("User", usera)
+    // Create new project
+    const newProject = new Project({
+      repositoryUrl,
+      name: repoData.name,
+      description: repoData.description,
+      owner,
+      stars: repoData.stargazers_count,
+      forks: repoData.forks_count,
+      pullRequests,
+      issues,
+      workspace:workspaceId ,
+      addedBy: usera._id ,
+      lastSynced: new Date()
+    });
+    
+    await newProject.save();
+    
+    res.status(201).json(newProject);
+  } catch (error) {
+    console.error('Error adding project:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Get all projects for a workspace
+app.get('/api/workspaces/:workspaceId/projects', async (req, res) => {
+  try {
+    const projects = await Project.find({ workspace: req.params.workspaceId });
+    res.json(projects);
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+app.get('/api/workspaces/:workspaceId/users', async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+
+    const workspace = await Workspace.findById(workspaceId).populate('members.userId', '-password');
+
+    if (!workspace) {
+      return res.status(404).json({ message: 'Workspace not found' });
+    }
+
+    const users = workspace.members.map(member => ({
+      _id: member.userId._id,
+      firstName: member.userId.firstName,
+      lastName: member.userId.lastName,
+      email: member.userId.email,
+      avatar: member.userId.avatar,
+      status: member.userId.status,
+      role: member.role, 
+    }));
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Error fetching workspace users:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+// Assign PR or issue to a user
+app.patch('/api/projects/:projectId/:type/:itemId/assign', async (req, res) => {
+  try {
+    const { projectId, type, itemId } = req.params;
+    const { userId } = req.body;
+    
+    const project = await Project.findById(projectId);
+    
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+    
+    if (type === 'pullrequest') {
+      const pr = project.pullRequests.id(itemId);
+      if (!pr) {
+        return res.status(404).json({ message: 'Pull request not found' });
+      }
+      pr.assignee = userId;
+    } else if (type === 'issue') {
+      const issue = project.issues.id(itemId);
+      if (!issue) {
+        return res.status(404).json({ message: 'Issue not found' });
+      }
+      issue.assignee = userId;
+    } else {
+      return res.status(400).json({ message: 'Invalid type. Must be pullrequest or issue' });
+    }
+    
+    await project.save();
+    
+    res.json(project);
+  } catch (error) {
+    console.error('Error assigning item:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 app.get('/api/messages/:userEmail', async (req, res) => {
   try {
@@ -946,6 +1094,7 @@ io.on('sendMessage', async (data) => {
     console.error('Error sending message:', error);
   }
 });
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

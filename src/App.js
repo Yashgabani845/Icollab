@@ -18,6 +18,7 @@ import Profile from "./components/Auth/Profile";
 import CreateChannel from "./components/Dashboard/CreateChannel";
 import ChannelChat from "./components/Chat/ChannelChat"; // Import new channel chat component
 import Mesh from "./components/VideoChat/Mesh";
+import ProjectManager from "./components/Dashboard/ProjectManager";
 
 const App = () => {
   return (
@@ -42,6 +43,7 @@ const App = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/about" element={<Contact />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/workspace/:workspaceId/projects" element={<ProjectManager />} />
       </Routes>
     </Router>
   );

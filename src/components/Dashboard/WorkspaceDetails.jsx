@@ -41,6 +41,45 @@ const WorkspaceDetail = () => {
       {/* Navigation Bar */}
       <div className="navbar">
         <h2>{workspace?.name || "Workspace"}</h2>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <Link 
+            to={`/workspace/${workspace._id}/projects`} 
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#4a90e2',
+              color: 'white',
+              borderRadius: '4px',
+              textDecoration: 'none',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'background-color 0.3s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#3a7bc8'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4a90e2'}
+          >
+            <span style={{ fontSize: '18px' }}>🚀</span> Explore Projects
+          </Link>
+          <Link 
+            to="/" 
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#f0f0f0',
+              color: '#333',
+              borderRadius: '4px',
+              textDecoration: 'none',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              transition: 'background-color 0.3s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+          >
+            Exit
+          </Link>
+        </div>
       </div>
 
       <div className="workspace-content">

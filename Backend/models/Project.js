@@ -1,124 +1,39 @@
 const mongoose = require('mongoose');
 
-const projectSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  description: {
-    type: String,
-    required: true
-  },
-  status: {
-    type: String,
-    enum: ['active', 'completed', 'on-hold'],
-    default: 'active'
-  },
-  workspace: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Workspace',
-    required: true
-  },
-  teamMembers: [{
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    role: {
-      type: String,
-      enum: ['project_lead', 'team_member', 'observer'],
-      default: 'team_member'
-    },
-    joinedAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  tasks: [{
-    title: String,
-    description: String,
-    assignedTo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    dueDate: Date,
-    priority: {
-      type: String,
-      enum: ['high', 'medium', 'low'],
-      default: 'medium'
-    },
-    status: {
-      type: String,
-      enum: ['todo', 'in_progress', 'review', 'completed'],
-      default: 'todo'
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  milestones: [{
-    title: String,
-    description: String,
-    dueDate: Date,
-    status: {
-      type: String,
-      enum: ['pending', 'completed'],
-      default: 'pending'
-    },
-    completedAt: Date
-  }],
-  timeline: {
-    startDate: {
-      type: Date,
-      required: true
-    },
-    endDate: {
-      type: Date,
-      required: true
-    },
-    actualStartDate: Date,
-    actualEndDate: Date
-  },
-  documents: [{
-    title: String,
-    content: String,
-    fileUrl: String,
-    uploadedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    uploadedAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
-}, {
-  timestamps: true
-});
+const PullRequestSchema = new mongoose.Schema({
+  id: { type: Number, required: true },
+  title: { type: String, required: true },
+  url: { type: String, required: true },
+  state: { type: String, enum: ['open', 'closed', 'merged'], required: true },
+  createdAt: { type: Date, required: true },
+  updatedAt: { type: Date, required: true },
+  assignee: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  repository: { type: String, required: true }
+}, { timestamps: true });
 
-// Add index for better query performance
-projectSchema.index({ workspace: 1, status: 1 });
-projectSchema.index({ 'tasks.assignedTo': 1, 'tasks.status': 1 });
+const IssueSchema = new mongoose.Schema({
+  id: { type: Number, required: true },
+  title: { type: String, required: true },
+  url: { type: String, required: true },
+  state: { type: String, enum: ['open', 'closed'], required: true },
+  createdAt: { type: Date, required: true },
+  updatedAt: { type: Date, required: true },
+  assignee: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  repository: { type: String, required: true }
+}, { timestamps: true });
 
-const Project = mongoose.model('Project', projectSchema);
+const ProjectSchema = new mongoose.Schema({
+  repositoryUrl: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  description: { type: String },
+  owner: { type: String, required: true },
+  stars: { type: Number, default: 0 },
+  forks: { type: Number, default: 0 },
+  pullRequests: [PullRequestSchema],
+  issues: [IssueSchema],
+  workspace: { type: mongoose.Schema.Types.ObjectId, ref: 'Workspace', required: true },
+  addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  lastSynced: { type: Date, default: Date.now }
+}, { timestamps: true });
 
-module.exports = Project;
+module.exports = mongoose.model('Project', ProjectSchema);
