@@ -1,4 +1,4 @@
-.navbar {
+.icollab-navbar {
   background-color: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
   padding: 0.5rem 1rem;
@@ -8,7 +8,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.navbar .container {
+.icollab-navbar .icollab-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -16,23 +16,23 @@
   margin: 0 auto;
 }
 
-.logo-link {
+.icollab-logo-link {
   text-decoration: none;
   color: #333;
 }
 
-.logo-text {
+.icollab-logo-text {
   font-size: 1.75rem;
   font-weight: 400;
   letter-spacing: 0.05em;
 }
 
-.nav-links {
+.icollab-nav-links {
   display: flex;
   align-items: center;
 }
 
-.nav-links ul {
+.icollab-nav-links ul {
   list-style: none;
   display: flex;
   gap: 2rem;
@@ -40,7 +40,7 @@
   padding: 0;
 }
 
-.nav-links ul a {
+.icollab-nav-links ul a {
   color: #333;
   text-decoration: none;
   font-size: 1rem;
@@ -48,22 +48,22 @@
   transition: color 0.3s ease;
 }
 
-.nav-links ul a:hover {
+.icollab-nav-links ul a:hover {
   color: #4a154b;
 }
 
-.action-buttons {
+.icollab-action-buttons {
   display: flex;
   align-items: center;
   gap: 1.5rem;
 }
 
-.search-bar {
+.icollab-search-bar {
   position: relative;
   width: 250px;
 }
 
-.search-bar input {
+.icollab-search-bar input {
   width: 90%;
   padding: 0.5rem 2rem 0.5rem 0.75rem;
   border: 1px solid #ddd;
@@ -72,13 +72,13 @@
   transition: all 0.3s ease;
 }
 
-.search-bar input:focus {
+.icollab-search-bar input:focus {
   outline: none;
   border-color: #333;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
-.search-icon {
+.icollab-search-icon {
   position: absolute;
   right: 0.75rem;
   top: 50%;
@@ -87,13 +87,13 @@
   pointer-events: none;
 }
 
-.workspace-btn {
+.icollab-workspace-btn {
   background-color: #fff;
   color: #3a3a3a;
-  border: 1px solid #ccc; /* Light border for a more subtle look */
-  border-radius: 30px; /* Slightly rounded for a softer appearance */
+  border: 1px solid #ccc;
+  border-radius: 30px;
   padding: 0.6rem 1.2rem;
-  font-size: 0.9rem; /* Slightly larger font size for better visibility */
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   height: 33px;
@@ -101,24 +101,25 @@
   margin-left: 5px;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow for some depth */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.workspace-btn:hover {
-  background-color: #f0f0f0; /* Soft background color on hover */
-  color: #313131; /* Change text color on hover for a more interactive feel */
-  border-color: #393939; /* Change border color on hover */
+.icollab-workspace-btn:hover {
+  background-color: #f0f0f0;
+  color: #313131;
+  border-color: #393939;
 }
 
-.workspace-btn a{
+.icollab-workspace-btn a {
   text-decoration: none;
   color: black;
 }
-.user-menu {
+
+.icollab-user-menu {
   position: relative;
 }
 
-.user-menu-btn {
+.icollab-user-menu-btn {
   display: flex;
   align-items: center;
   background: none;
@@ -127,14 +128,14 @@
   padding: 0.25rem 0.5rem;
 }
 
-.avatar {
+.icollab-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
   margin-right: 0.5rem;
 }
 
-.user-dropdown {
+.icollab-user-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
@@ -145,11 +146,11 @@
   display: none;
 }
 
-.user-menu:hover .user-dropdown {
+.icollab-user-menu:hover .icollab-user-dropdown {
   display: block;
 }
 
-.user-dropdown button {
+.icollab-user-dropdown button {
   display: flex;
   align-items: center;
   width: 100%;
@@ -160,22 +161,22 @@
   transition: background-color 0.3s ease;
 }
 
-.user-dropdown button:hover {
+.icollab-user-dropdown button:hover {
   background-color: #f5f5f5;
 }
 
-.user-dropdown button svg {
+.icollab-user-dropdown button svg {
   margin-right: 0.5rem;
 }
 
-.auth-buttons {
+.icollab-auth-buttons {
   width: 200px;
   display: flex;
   gap: 0.5rem;
-
 }
 
-.login-btn, .signup-btn {
+.icollab-login-btn,
+.icollab-signup-btn {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   font-size: 1rem;
@@ -185,66 +186,66 @@
   transition: all 0.3s ease;
 }
 
-.login-btn {
+.icollab-login-btn {
   background-color: transparent;
   color: #4a154b;
   border: 1px solid #4a154b;
 }
 
-.login-btn:hover {
+.icollab-login-btn:hover {
   background-color: rgba(74, 21, 75, 0.1);
 }
 
-.signup-btn {
+.icollab-signup-btn {
   background-color: #4a154b;
   color: white;
   border: none;
 }
 
-.signup-btn:hover {
+.icollab-signup-btn:hover {
   background-color: #611f69;
 }
 
 @media (max-width: 1024px) {
-  .navbar .container {
+  .icollab-navbar .icollab-container {
     flex-wrap: wrap;
     justify-content: center;
     gap: 1rem;
   }
 
-  .nav-links {
+  .icollab-nav-links {
     order: 3;
     width: 100%;
   }
 
-  .nav-links ul {
+  .icollab-nav-links ul {
     justify-content: center;
   }
 
-  .action-buttons {
+  .icollab-action-buttons {
     order: 2;
   }
 }
 
 @media (max-width: 768px) {
-  .action-buttons {
+  .icollab-action-buttons {
     flex-direction: column;
     width: 100%;
   }
 
-  .search-bar {
+  .icollab-search-bar {
     width: 100%;
   }
 
-  .workspace-btn,
-  .user-menu,
-  .auth-buttons {
+  .icollab-workspace-btn,
+  .icollab-user-menu,
+  .icollab-auth-buttons {
     width: 100%;
   }
 
-  .user-menu-btn,
-  .login-btn,
-  .signup-btn {
+  .icollab-user-menu-btn,
+  .icollab-login-btn,
+  .icollab-signup-btn {
     justify-content: center;
     width: 100%;
   }

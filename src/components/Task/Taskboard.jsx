@@ -1,16 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Menu,
-  Plus,
-  Layout,
-  Users,
-  Calendar,
-  Table,
-  Settings,
-  HelpCircle,
-  Bell,
-  Search,
-} from 'lucide-react';
+import { Menu, Plus, Layout, Table, Calendar, Settings, HelpCircle, Bell, Search, ChevronRight, Star, Clock, CheckSquare, BarChart2, FileText, Bookmark, Folder, MessageCircle } from 'lucide-react';
 import '../../CSS/Task/task.css';
 import TaskList from './TaskList';
 
@@ -21,28 +10,31 @@ const Taskboard = () => {
   const [lists, setLists] = useState([]);
   const [newListTitle, setNewListTitle] = useState('');
   const [isAddingList, setIsAddingList] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // Track loading state
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeSection, setActiveSection] = useState('boards');
 
   useEffect(() => {
-    const fetchTaskLists = async () => {
-      setIsLoading(true); // Set loading to true before fetching
+    if (activeSection === 'boards') {
+      fetchTaskLists();
+    }
+  }, [activeSection]);
 
-      try {
-        const response = await fetch(`http://localhost:5000/api/tasklists?userEmail=${localStorage.email}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch task lists');
-        }
-        const data = await response.json();
-        setLists(data);
-      } catch (error) {
-        console.error('Error fetching task lists:', error);
-      } finally {
-        setIsLoading(false); // Set loading to false after fetching is done
+  const fetchTaskLists = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/tasklists?userEmail=${localStorage.email}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch task lists');
       }
-    };
-
-    fetchTaskLists();
-  }, []); // Empty dependency array ensures this runs only once on component mount
+      const data = await response.json();
+      setLists(data);
+    } catch (error) {
+      console.error('Error fetching task lists:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const addNewList = async () => {
     if (!newListTitle.trim()) {
@@ -70,11 +62,7 @@ const Taskboard = () => {
       }
 
       const savedList = await response.json();
-
-      // Optimistically update the UI by adding the new list to the state
       setLists((prevLists) => [...prevLists, savedList]);
-
-      // Reset input and close the form
       setNewListTitle('');
       setIsAddingList(false);
     } catch (error) {
@@ -90,12 +78,289 @@ const Taskboard = () => {
     }
   };
 
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'boards':
+        return (
+          <div className="rd-lists-container">
+            {isLoading ? (
+              <div className="rd-spinner">
+                <Circles height="80" width="80" color="#4a5568" ariaLabel="loading" />
+              </div>
+            ) : (
+              lists.map((list) => (
+                <TaskList key={list.name} lname={list.name} tasks={list.tasks} />
+              ))
+            )}
+
+            {isAddingList ? (
+              <div className="rd-add-list-form">
+                <input
+                  type="text"
+                  value={newListTitle}
+                  onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Enter list name"
+                  className="rd-add-list-input"
+                  autoFocus
+                />
+                <div className="rd-add-list-actions">
+                  <button onClick={addNewList} className="rd-add-list-submit">
+                    Add List
+                  </button>
+                  <button
+                    onClick={() => setIsAddingList(false)}
+                    className="rd-add-list-cancel"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsAddingList(true)}
+                className="rd-add-list-btn"
+              >
+                <Plus className="rd-plus-icon" />
+                Add another list
+              </button>
+            )}
+          </div>
+        );
+      
+      case 'table':
+        return (
+          <div className="rd-section-content">
+            <div className="rd-section-header">
+              <h2>Table View</h2>
+              <p>Organize your tasks in a structured table format</p>
+            </div>
+            <div className="rd-table-container">
+              <table className="rd-table">
+                <thead>
+                  <tr>
+                    <th>Task Name</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Due Date</th>
+                    <th>Assigned To</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Design new landing page</td>
+                    <td><span className="rd-status rd-status-progress">In Progress</span></td>
+                    <td><span className="rd-priority rd-priority-high">High</span></td>
+                    <td>Oct 15, 2023</td>
+                    <td>John Doe</td>
+                  </tr>
+                  <tr>
+                    <td>Update user documentation</td>
+                    <td><span className="rd-status rd-status-todo">To Do</span></td>
+                    <td><span className="rd-priority rd-priority-medium">Medium</span></td>
+                    <td>Oct 20, 2023</td>
+                    <td>Jane Smith</td>
+                  </tr>
+                  <tr>
+                    <td>Fix navigation bug</td>
+                    <td><span className="rd-status rd-status-done">Done</span></td>
+                    <td><span className="rd-priority rd-priority-high">High</span></td>
+                    <td>Oct 10, 2023</td>
+                    <td>Mike Johnson</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      
+      case 'calendar':
+        return (
+          <div className="rd-section-content">
+            <div className="rd-section-header">
+              <h2>Calendar View</h2>
+              <p>View your tasks in a calendar format</p>
+            </div>
+            <div className="rd-calendar-container">
+              <div className="rd-calendar-header">
+                <button className="rd-calendar-nav-btn">&lt;</button>
+                <h3>October 2023</h3>
+                <button className="rd-calendar-nav-btn">&gt;</button>
+              </div>
+              <div className="rd-calendar-weekdays">
+                <div>Sun</div>
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
+              </div>
+              <div className="rd-calendar-days">
+                {Array.from({ length: 31 }, (_, i) => (
+                  <div key={i} className={`rd-calendar-day ${i === 14 ? 'rd-calendar-day-active' : ''}`}>
+                    <span className="rd-day-number">{i + 1}</span>
+                    {i === 14 && (
+                      <div className="rd-calendar-event">Design new landing page</div>
+                    )}
+                    {i === 19 && (
+                      <div className="rd-calendar-event">Update documentation</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 'notifications':
+        return (
+          <div className="rd-section-content">
+            <div className="rd-section-header">
+              <h2>Notifications</h2>
+              <p>Stay updated with your task activities</p>
+            </div>
+            <div className="rd-notifications-list">
+              <div className="rd-notification rd-notification-unread">
+                <div className="rd-notification-icon">
+                  <CheckSquare size={18} />
+                </div>
+                <div className="rd-notification-content">
+                  <p className="rd-notification-text"><strong>John Doe</strong> completed task <strong>"Design new landing page"</strong></p>
+                  <p className="rd-notification-time">2 hours ago</p>
+                </div>
+              </div>
+              <div className="rd-notification rd-notification-unread">
+                <div className="rd-notification-icon">
+                  <Plus size={18} />
+                </div>
+                <div className="rd-notification-content">
+                  <p className="rd-notification-text"><strong>Jane Smith</strong> assigned you to <strong>"Update user documentation"</strong></p>
+                  <p className="rd-notification-time">Yesterday</p>
+                </div>
+              </div>
+              <div className="rd-notification">
+                <div className="rd-notification-icon">
+                  <Clock size={18} />
+                </div>
+                <div className="rd-notification-content">
+                  <p className="rd-notification-text">Task <strong>"Fix navigation bug"</strong> is due tomorrow</p>
+                  <p className="rd-notification-time">2 days ago</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 'settings':
+        return (
+          <div className="rd-section-content">
+            <div className="rd-section-header">
+              <h2>Settings</h2>
+              <p>Customize your taskboard experience</p>
+            </div>
+            <div className="rd-settings-container">
+              <div className="rd-settings-group">
+                <h3>Account Settings</h3>
+                <div className="rd-setting-item">
+                  <div className="rd-setting-info">
+                    <h4>Profile Information</h4>
+                    <p>Update your name, email, and profile picture</p>
+                  </div>
+                  <ChevronRight size={18} />
+                </div>
+                <div className="rd-setting-item">
+                  <div className="rd-setting-info">
+                    <h4>Password</h4>
+                    <p>Change your password</p>
+                  </div>
+                  <ChevronRight size={18} />
+                </div>
+              </div>
+              <div className="rd-settings-group">
+                <h3>Preferences</h3>
+                <div className="rd-setting-item">
+                  <div className="rd-setting-info">
+                    <h4>Theme</h4>
+                    <p>Choose between light and dark mode</p>
+                  </div>
+                  <div className="rd-theme-toggle">
+                    <span className="rd-theme-option rd-theme-active">Light</span>
+                    <span className="rd-theme-option">Dark</span>
+                  </div>
+                </div>
+                <div className="rd-setting-item">
+                  <div className="rd-setting-info">
+                    <h4>Notifications</h4>
+                    <p>Manage your notification preferences</p>
+                  </div>
+                  <ChevronRight size={18} />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 'help':
+        return (
+          <div className="rd-section-content">
+            <div className="rd-section-header">
+              <h2>Help Center</h2>
+              <p>Get assistance with using the taskboard</p>
+            </div>
+            <div className="rd-help-container">
+              <div className="rd-help-search">
+                <input type="text" placeholder="Search for help..." />
+                <button className="rd-help-search-btn">Search</button>
+              </div>
+              <div className="rd-help-categories">
+                <div className="rd-help-category">
+                  <div className="rd-help-category-icon">
+                    <FileText size={24} />
+                  </div>
+                  <h3>Documentation</h3>
+                  <p>Comprehensive guides on how to use the taskboard</p>
+                  <a href="#" className="rd-help-link">View Documentation</a>
+                </div>
+                <div className="rd-help-category">
+                  <div className="rd-help-category-icon">
+                    <HelpCircle size={24} />
+                  </div>
+                  <h3>FAQs</h3>
+                  <p>Answers to commonly asked questions</p>
+                  <a href="#" className="rd-help-link">View FAQs</a>
+                </div>
+                <div className="rd-help-category">
+                  <div className="rd-help-category-icon">
+                    <MessageCircle size={24} />
+                  </div>
+                  <h3>Contact Support</h3>
+                  <p>Get in touch with our support team</p>
+                  <a href="#" className="rd-help-link">Contact Support</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      
+      default:
+        return (
+          <div className="rd-section-content">
+            <div className="rd-section-header">
+              <h2>Welcome to Taskboard</h2>
+              <p>Select a section from the sidebar to get started</p>
+            </div>
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="rd-dashboard">
       <div className="rd-sidebar">
         <div className="rd-sidebar-header">
           <Menu className="rd-menu-icon" />
-          <h1>Dashboard</h1>
+          <h1>Taskboard</h1>
         </div>
 
         <div className="rd-search-bar">
@@ -104,83 +369,77 @@ const Taskboard = () => {
         </div>
 
         <nav className="rd-sidebar-nav">
-          <div className="rd-nav-item">
+          <div 
+            className={`rd-nav-item ${activeSection === 'boards' ? 'rd-nav-item-active' : ''}`}
+            onClick={() => setActiveSection('boards')}
+          >
             <Layout className="rd-nav-icon" />
             <span>Boards</span>
           </div>
-          <div className="rd-nav-item">
-            <Users className="rd-nav-icon" />
-            <span>Members</span>
-          </div>
-          <div className="rd-nav-item">
+          <div 
+            className={`rd-nav-item ${activeSection === 'table' ? 'rd-nav-item-active' : ''}`}
+            onClick={() => setActiveSection('table')}
+          >
             <Table className="rd-nav-icon" />
             <span>Table</span>
           </div>
-          <div className="rd-nav-item">
+          <div 
+            className={`rd-nav-item ${activeSection === 'calendar' ? 'rd-nav-item-active' : ''}`}
+            onClick={() => setActiveSection('calendar')}
+          >
             <Calendar className="rd-nav-icon" />
             <span>Calendar</span>
           </div>
-          <div className="rd-nav-item">
+          <div 
+            className={`rd-nav-item ${activeSection === 'notifications' ? 'rd-nav-item-active' : ''}`}
+            onClick={() => setActiveSection('notifications')}
+          >
             <Bell className="rd-nav-icon" />
             <span>Notifications</span>
           </div>
-          <div className="rd-nav-item">
+          <div 
+            className={`rd-nav-item ${activeSection === 'settings' ? 'rd-nav-item-active' : ''}`}
+            onClick={() => setActiveSection('settings')}
+          >
             <Settings className="rd-nav-icon" />
             <span>Settings</span>
           </div>
-          <div className="rd-nav-item">
+          <div 
+            className={`rd-nav-item ${activeSection === 'help' ? 'rd-nav-item-active' : ''}`}
+            onClick={() => setActiveSection('help')}
+          >
             <HelpCircle className="rd-nav-icon" />
             <span>Help</span>
           </div>
         </nav>
+
+        <div className="rd-sidebar-favorites">
+          <h3>Favorites</h3>
+          <div className="rd-favorite-item">
+            <Star className="rd-favorite-icon" />
+            <span>Marketing Campaign</span>
+          </div>
+          <div className="rd-favorite-item">
+            <Star className="rd-favorite-icon" />
+            <span>Product Launch</span>
+          </div>
+        </div>
+
+        <div className="rd-sidebar-recent">
+          <h3>Recent</h3>
+          <div className="rd-recent-item">
+            <Clock className="rd-recent-icon" />
+            <span>Website Redesign</span>
+          </div>
+          <div className="rd-recent-item">
+            <Clock className="rd-recent-icon" />
+            <span>Q4 Planning</span>
+          </div>
+        </div>
       </div>
 
       <div className="rd-main-content">
-        <div className="rd-lists-container">
-          {/* Show loading spinner if data is being fetched */}
-          {isLoading ? (
-            <div className="rd-spinner">
-              <Circles height="80" width="80" color="blue" ariaLabel="loading" />
-            </div>
-          ) : (
-            // Render lists when not loading
-            lists.map((list) => (
-              <TaskList key={list.name} lname={list.name} tasks={list.tasks} />
-            ))
-          )}
-
-          {isAddingList ? (
-            <div className="rd-add-list-form">
-              <input
-                type="text"
-                value={newListTitle}
-                onChange={handleInputChange}
-                onKeyPress={handleKeyPress}
-                placeholder="Enter list name"
-                className="rd-add-list-input"
-              />
-              <div className="rd-add-list-actions">
-                <button onClick={addNewList} className="rd-add-list-submit">
-                  Add List
-                </button>
-                <button
-                  onClick={() => setIsAddingList(false)}
-                  className="rd-add-list-cancel"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button
-              onClick={() => setIsAddingList(true)}
-              className="rd-add-list-btn"
-            >
-              <Plus className="rd-plus-icon" />
-              Add another list
-            </button>
-          )}
-        </div>
+        {renderContent()}
       </div>
     </div>
   );

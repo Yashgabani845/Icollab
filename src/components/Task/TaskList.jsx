@@ -41,7 +41,6 @@ const TaskList = ({ tasks, lname }) => {
     fetchTasks();
   }, [lname, localStorage.email]); // Only re-fetch if taskListName or userEmail changes
 
-  // Show loading state while fetching data
   if (isLoading) {
     return <div>Loading tasks...</div>;
   }
@@ -104,12 +103,14 @@ const TaskList = ({ tasks, lname }) => {
       ) : (
         <div className="task-list">
           {tasksList.map((task) => (
-            <Task
-              key={task.id}
-              title={task.title}
-              description={task.description}
-              activityLog={task.activityLog}
-            />
+          <Task
+          key={task._id}  // Use `_id` because MongoDB stores `_id` instead of `id`
+          taskId={task._id} // Ensure `taskId` is passed
+          title={task.title}
+          description={task.description}
+          taskListId={task.taskListId} // Make sure this exists in your Task schema
+         
+        />
           ))}
         </div>
       )}

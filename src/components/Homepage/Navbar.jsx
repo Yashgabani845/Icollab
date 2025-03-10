@@ -5,7 +5,7 @@ import logo from "../../Images/logo.png";
 import { FaUserCircle } from 'react-icons/fa';
 import { FiPlusCircle, FiSearch, FiUser, FiLogOut } from 'react-icons/fi';
 
-const Navbar = () => {
+const IcollabNavbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userName, setUserName] = useState("");
   const navigate = useNavigate();
@@ -34,34 +34,33 @@ const Navbar = () => {
   };
 
   return (
-    <header className="navbar">
-      <div className="container">
-        <Link to="/" className="logo-link">
-          <span className="logo-text">Icollab</span>
+    <header className="icollab-navbar">
+      <div className="icollab-container">
+        <Link to="/" className="icollab-logo-link">
+          <span className="icollab-logo-text">Icollab</span>
         </Link>
-        <nav className="nav-links">
+        <nav className="icollab-nav-links">
           <ul>
-            <li><Link to="/dashboard">Dashboard</Link></li>
+            <li><Link to="/dashboard">Workspaces</Link></li>
+            <li><Link to="/task">Taskboard</Link></li>
             <li><Link to="/about">About</Link></li>
-            <li><Link to="/contact">Contact</Link></li>
           </ul>
         </nav>
-        <div className="action-buttons">
-          <div className="search-bar">
+        <div className="icollab-action-buttons">
+          <div className="icollab-search-bar">
             <input type="text" placeholder="Search..." />
-            <FiSearch className="search-icon" />
           </div>
-          <button className="workspace-btn" title="Create Workspace">
+          <button className="icollab-workspace-btn" title="Create Workspace">
             <FiPlusCircle />
             <Link to="/workspace/create">Create Workspace</Link>
           </button>
           {isAuthenticated ? (
-            <div className="user-menu">
-              <button className="user-menu-btn">
-                <FaUserCircle className="avatar" />
+            <div className="icollab-user-menu">
+              <button className="icollab-user-menu-btn">
+                <FaUserCircle className="icollab-avatar" />
                 <span>{truncateEmail(userName)}</span>
               </button>
-              <div className="user-dropdown">
+              <div className="icollab-user-dropdown">
                 <button onClick={() => navigate("/profile")}>
                   <FiUser />
                   <span>Profile</span>
@@ -73,9 +72,9 @@ const Navbar = () => {
               </div>
             </div>
           ) : (
-            <div className="auth-buttons">
-              <Link to="/login" className="login-btn">Sign In</Link>
-              <Link to="/signup" className="signup-btn">Sign Up</Link>
+            <div className="icollab-auth-buttons">
+              <Link to="/login" className="icollab-login-btn">Sign In</Link>
+              <Link to="/signup" className="icollab-signup-btn">Sign Up</Link>
             </div>
           )}
         </div>
@@ -84,7 +83,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
-
-
-
+export default IcollabNavbar;

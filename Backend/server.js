@@ -14,6 +14,9 @@ const http = require('http');
 const Message = require('./models/Message');
 const nodemailer = require('nodemailer');
 const Task = require('./models/Task');
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 const URI = process.env.MONGO_URI || 'mongodb+srv://YashGabani:Yash9182@cluster0.n77u6.mongodb.net/Icollab?retryWrites=true&w=majority&appName=Cluster0';
 
@@ -579,6 +582,34 @@ app.get("/api/workspaces", async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch workspaces', error: error.message });
   }
 });
+app.get('/api/workspaces/:workspaceName/members', async (req, res) => {
+  try {
+    
+
+    
+    const workspace = await Workspace.findOne({ name: req.params.workspaceName });
+
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+    const members = await Promise.all(workspace.members.map(async (member) => {
+      const usera = await User.findById(member.userId);
+      return {
+        _id: usera._id,
+        firstName: usera.firstName,
+        lastName: usera.lastName,
+        email: usera.email,
+        role: usera.role,
+      };
+    }));
+    
+
+    res.json(members);
+  } catch (error) {    
+    console.error('Error fetching workspace members:', error);
+    res.status(500).json({ message: 'Failed to fetch workspace members', error: error.message });
+  }
+});
 
 // Get workspace by name
 app.get('/api/workspaces/:workspaceName', async (req, res) => {
@@ -739,9 +770,29 @@ app.post('/api/workspaces/:workspaceName/channels', async (req, res) => {
 
 
 
+app.get('/api/tasklist/:taskListId', async (req, res) => {
+  try {
+    const { taskListId } = req.params;
+    console.log(taskListId)
+    // Fetch the TaskList by ID
+    const taskList = await TaskList.findById(taskListId);
+    console.log(taskList)
+    // If not found, return an error
+    if (!taskList) {
+      return res.status(404).json({ error: 'TaskList not found' });
+    }
+
+    // Return the taskList
+    res.status(200).json(taskList);
+  } catch (error) {
+    console.error('Error fetching task list:', error);
+    res.status(500).json({ error: 'Failed to fetch task list' });
+  }
+});
 
 app.get('/api/tasklists', async (req, res) => {
   const { userEmail } = req.query;
+  console.log(userEmail)
   const user = await User.findOne({ email: userEmail });
   try {
     const taskLists = await TaskList.find({ createdBy: user._id });
@@ -771,25 +822,58 @@ app.post('/api/tasklists', async (req, res) => {
     res.status(500).json({ message: 'Failed to add a new task list' });
   }
 });
+app.get('/api/task/:taskId', async (req, res) => {
+  try {
+    const { taskId } = req.params;
+
+    // Fetch the task from the database
+    const task = await Task.findById(taskId).populate("createdBy").populate("taskListId");
+
+    if (!task) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+
+    res.status(200).json(task);
+  } catch (error) {
+    console.error("Error fetching task:", error);
+    res.status(500).json({ error: "Failed to fetch task" });
+  }
+});
+
 app.get('/api/tasks', async (req, res) => {
   const { taskListName, userEmail } = req.query;
-  console.log(req.query)
+
   try {
+    // Step 1: Fetch TaskList by Name
     const taskList = await TaskList.findOne({ name: taskListName });
+
     if (!taskList) {
       return res.status(400).json({ error: 'TaskList not found' });
     }
+
+    // Step 2: Fetch User by Email
     const user = await User.findOne({ email: userEmail });
+
     if (!user) {
       return res.status(400).json({ error: 'User not found' });
     }
-    console.log(user, taskList)
-    const tasks = await Task.find({
-      createdBy: user._id,
-      taskListId: taskList._id,
-    })
-    console.log(tasks)
-    res.status(200).json(tasks);
+
+    // Step 3: Extract All Task IDs from the TaskList
+    const taskIds = taskList.tasks; // Assuming taskList.tasks is an array of task _ids
+
+    if (!taskIds || taskIds.length === 0) {
+      return res.status(200).json([]); // No tasks found, return empty array
+    }
+
+    // Step 4: Fetch and Filter Tasks in MongoDB Query
+    const userTasks = await Task.find({
+      _id: { $in: taskIds }, 
+      createdBy: user._id,  // Ensure filtering happens at the DB level
+    });
+
+    // Step 5: Return Filtered Tasks
+    res.status(200).json(userTasks);
+
   } catch (error) {
     console.error('Error fetching tasks:', error);
     res.status(500).json({ error: 'Failed to fetch tasks' });
@@ -797,30 +881,34 @@ app.get('/api/tasks', async (req, res) => {
 });
 app.post('/api/tasks', async (req, res) => {
   const { title, description, priority, createdBy, Tasklist } = req.body;
+
   try {
-    // Find the TaskList by its name
-    console.log(req.body)
+    console.log(req.body);
+
+    // Step 1: Find User
     const user = await User.findOne({ email: createdBy });
     if (!user) {
       return res.status(400).json({ error: 'User not found' });
     }
-    const taskList = await TaskList.findOne({ name: Tasklist, createdBy: user._id });
-    console.log(taskList)
+
+    // Step 2: Find TaskList
+    const taskList = await TaskList.findOne({ name: Tasklist });
     if (!taskList) {
       return res.status(400).json({ error: 'TaskList not found' });
     }
-    // Find the User by their email
 
-    // Check if the task with the same title already exists in the TaskList for the given user
+    // Step 3: Ensure the task with the same title does not exist
     const existingTask = await Task.findOne({
-      createdBy: user._id,
-      taskListId: taskList._id,
       title,
+      taskListId: taskList._id, 
+      createdBy: user._id, 
     });
+
     if (existingTask) {
       return res.status(400).json({ error: 'A task with this title already exists in this task list' });
     }
-    // Create and save the new task
+
+    // Step 4: Create and Save New Task
     const newTask = new Task({
       title,
       description,
@@ -828,10 +916,13 @@ app.post('/api/tasks', async (req, res) => {
       priority,
       labels: [],
       checklist: [],
-      taskListId: taskList._id, // Tied to the task list
-      createdBy: user._id, // User creating the task
+      taskListId: taskList._id,
+      createdBy: user._id,
     });
+
     await newTask.save();
+
+    // Step 5: Push New Task ID to TaskList and Save
     taskList.tasks.push(newTask._id);
     await taskList.save();
 
@@ -1118,6 +1209,506 @@ app.get('/api/messages/:userEmail', async (req, res) => {
     res.status(500).json({ message: 'Error fetching messages' });
   }
 });
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, "../uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    cb(
+      null,
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// Get a specific task with all details
+app.get("/api/tasks/:taskId", async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.taskId)
+      .populate("createdBy", "firstName lastName avatar")
+      .populate("assignedTo", "firstName lastName avatar")
+      .populate({
+        path: "comments",
+        populate: {
+          path: "user",
+          select: "firstName lastName avatar",
+        },
+      });
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    res.json(task);
+  } catch (error) {
+    console.error("Error fetching task:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Update task description
+app.put("/api/tasks/:taskId/description", async (req, res) => {
+  try {
+    const { description } = req.body;
+    const task = await Task.findByIdAndUpdate(
+      req.params.taskId,
+      { description },
+      { new: true }
+    );
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    res.json(task);
+  } catch (error) {
+    console.error("Error updating description:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Add a checklist item
+app.post("/api/tasks/:taskId/checklist", async (req, res) => {
+  try {
+    const { title , user } = req.body;
+    const task = await Task.findById(req.params.taskId);
+    const userId = await User.findOne({email: user});
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    const newChecklistItem = {
+      title,
+      status: false,
+      createdBy: userId._id, // From auth middleware
+    };
+
+    task.checklist.push(newChecklistItem);
+    await task.save();
+
+    // Return the newly created checklist item
+    res.status(201).json(task.checklist[task.checklist.length - 1]);
+  } catch (error) {
+    console.error("Error adding checklist item:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Update a checklist item
+app.put("/api/tasks/:taskId/checklist/:itemId", async (req, res) => {
+  try {
+    const { status } = req.body;
+    const task = await Task.findById(req.params.taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    const checklistItem = task.checklist.id(req.params.itemId);
+    if (!checklistItem) {
+      return res.status(404).json({ message: "Checklist item not found" });
+    }
+
+    checklistItem.status = status;
+    await task.save();
+
+    res.json(checklistItem);
+  } catch (error) {
+    console.error("Error updating checklist item:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Delete a checklist item
+app.delete("/api/tasks/:taskId/checklist/:itemId", async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    task.checklist = task.checklist.filter(
+      (item) => item._id.toString() !== req.params.itemId
+    );
+    await task.save();
+
+    res.json({ message: "Checklist item deleted" });
+  } catch (error) {
+    console.error("Error deleting checklist item:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Add a label
+app.post("/api/tasks/:taskId/labels", async (req, res) => {
+  try {
+    const { label } = req.body;
+    const task = await Task.findById(req.params.taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    if (!task.labels.includes(label)) {
+      task.labels.push(label);
+      await task.save();
+    }
+
+    res.json({ labels: task.labels });
+  } catch (error) {
+    console.error("Error adding label:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Remove a label
+app.delete("/api/tasks/:taskId/labels/:label", async (req, res) => {
+  try {
+    const label = decodeURIComponent(req.params.label);
+    const task = await Task.findById(req.params.taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    task.labels = task.labels.filter((l) => l !== label);
+    await task.save();
+
+    res.json({ labels: task.labels });
+  } catch (error) {
+    console.error("Error removing label:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Update task due date
+app.put("/api/tasks/:taskId/deadline", async (req, res) => {
+  try {
+    const { deadline } = req.body;
+    const task = await Task.findById(req.params.taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    task.dates.deadline = deadline; // null will remove the deadline
+    await task.save();
+
+    res.json(task);
+  } catch (error) {
+    console.error("Error updating deadline:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Add a comment
+app.post("/api/tasks/:taskId/comments", async (req, res) => {
+  try {
+    const { text,user } = req.body;
+    const task = await Task.findById(req.params.taskId);
+    const userId = await User.findOne({email: user});
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    const newComment = {
+      text,
+      user: userId._id, // From auth middleware
+      time: new Date(),
+    };
+
+    task.comments.push(newComment);
+    await task.save();
+
+    // Populate the user info for the new comment
+    const populatedTask = await Task.findById(req.params.taskId).populate({
+      path: "comments.user",
+      select: "firstName lastName avatar",
+      match: { _id: req.user.id },
+    });
+
+    // Get the newly created comment
+    const createdComment = populatedTask.comments[populatedTask.comments.length - 1];
+
+    res.status(201).json(createdComment);
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Delete a comment
+app.delete("/api/tasks/:taskId/comments/:commentId", async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // Ensure the user can only delete their own comments or they're an admin
+    const comment = task.comments.id(req.params.commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    if (comment.user.toString() !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Not authorized to delete this comment" });
+    }
+
+    task.comments = task.comments.filter(
+      (c) => c._id.toString() !== req.params.commentId
+    );
+    await task.save();
+
+    res.json({ message: "Comment deleted" });
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Upload task attachment
+app.post("/api/tasks/:taskId/attachments", upload.single("attachment"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const task = await Task.findById(req.params.taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // Create URL for the file
+    const fileUrl = `/uploads/${req.file.filename}`;
+    
+    task.attachments.push(fileUrl);
+    await task.save();
+
+    res.json({ url: fileUrl });
+  } catch (error) {
+    console.error("Error uploading attachment:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Delete task attachment
+app.delete("/api/tasks/:taskId/attachments", async (req, res) => {
+  try {
+    const { url } = req.body;
+    const task = await Task.findById(req.params.taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    task.attachments = task.attachments.filter((a) => a !== url);
+    await task.save();
+
+    // Optionally delete the actual file
+    const filePath = path.join(__dirname, "..", url);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    res.json({ message: "Attachment deleted" });
+  } catch (error) {
+    console.error("Error deleting attachment:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Upload cover photo
+app.post("/api/tasks/:taskId/cover", upload.single("cover"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const task = await Task.findById(req.params.taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // Create URL for the file
+    const fileUrl = `/uploads/${req.file.filename}`;
+    
+    // Remove old cover photo file if it exists
+    if (task.coverPhoto && task.coverPhoto.startsWith("/uploads/")) {
+      const oldFilePath = path.join(__dirname, "..", task.coverPhoto);
+      if (fs.existsSync(oldFilePath)) {
+        fs.unlinkSync(oldFilePath);
+      }
+    }
+
+    task.coverPhoto = fileUrl;
+    await task.save();
+
+    res.json({ url: fileUrl });
+  } catch (error) {
+    console.error("Error uploading cover photo:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Update cover (for color or URL)
+app.put("/api/tasks/:taskId/cover", async (req, res) => {
+  try {
+    const { coverPhoto } = req.body;
+    const task = await Task.findById(req.params.taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // Remove old cover photo file if it exists and we're removing/changing the cover
+    if (
+      task.coverPhoto && 
+      task.coverPhoto.startsWith("/uploads/") && 
+      coverPhoto !== task.coverPhoto
+    ) {
+      const oldFilePath = path.join(__dirname, "..", task.coverPhoto);
+      if (fs.existsSync(oldFilePath)) {
+        fs.unlinkSync(oldFilePath);
+      }
+    }
+
+    task.coverPhoto = coverPhoto;
+    await task.save();
+
+    res.json(task);
+  } catch (error) {
+    console.error("Error updating cover photo:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Move task to a different list
+app.put("/api/tasks/:taskId/move", async (req, res) => {
+  try {
+    const { taskListId } = req.body;
+    const task = await Task.findById(req.params.taskId);
+    
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // Verify the new list exists
+    const destinationList = await TaskList.findById(taskListId);
+    if (!destinationList) {
+      return res.status(404).json({ message: "Destination list not found" });
+    }
+
+    // Find the original list to remove task
+    const originalList = await TaskList.findById(task.taskListId);
+    if (originalList) {
+      originalList.tasks = originalList.tasks.filter(
+        (t) => t.toString() !== req.params.taskId
+      );
+      await originalList.save();
+    }
+
+    // Add task to new list
+    if (!destinationList.tasks.includes(req.params.taskId)) {
+      destinationList.tasks.push(req.params.taskId);
+      await destinationList.save();
+    }
+
+    // Update task's list reference
+    task.taskListId = taskListId;
+    await task.save();
+
+    res.json(task);
+  } catch (error) {
+    console.error("Error moving task:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Delete/Archive task
+app.delete("/api/tasks/:taskId", async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.taskId);
+    
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // Remove task from its list
+    await TaskList.findByIdAndUpdate(
+      task.taskListId,
+      { $pull: { tasks: req.params.taskId } }
+    );
+
+    // Delete the task
+    await Task.findByIdAndDelete(req.params.taskId);
+
+    res.json({ message: "Task deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting task:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Add/remove members from a task
+app.put("/api/tasks/:taskId/members", async (req, res) => {
+  try {
+    const { userId, action } = req.body;
+    
+    if (!["add", "remove"].includes(action)) {
+      return res.status(400).json({ message: "Invalid action" });
+    }
+
+    const task = await Task.findById(req.params.taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (action === "add" && !task.assignedTo.includes(userId)) {
+      task.assignedTo.push(userId);
+    } else if (action === "remove") {
+      task.assignedTo = task.assignedTo.filter(id => id.toString() !== userId);
+    }
+
+    await task.save();
+
+    // Return updated task with populated member info
+    const updatedTask = await Task.findById(req.params.taskId)
+      .populate("assignedTo", "firstName lastName avatar");
+
+    res.json(updatedTask);
+  } catch (error) {
+    console.error("Error updating task members:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Get all available users for assignment
+app.get("/users/available", async (req, res) => {
+  try {
+    const users = await User.find({}, "firstName lastName avatar");
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 io.on('sendMessage', async (data) => {
   try {
