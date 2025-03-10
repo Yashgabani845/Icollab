@@ -189,16 +189,37 @@ const ChannelChat = ({ channel, wname }) => {
 
   return (
     <div className="chat-container">
-      <div className="chat-header">
-        <h2>{channel?.name} Chat</h2>
-        <button 
-          className="summary-button" 
-          onClick={toggleSummary}
-          title="Show conversation summary"
-        >
-          {showSummary ? "Hide Summary" : "Show Summary"}
-        </button>
-      </div>
+     <div className="chat-header">
+  <h2>{channel?.name} Chat</h2>
+  <div className="header-buttons" style={{ display: "flex", alignItems: "center" }}>
+    <button 
+      className="video-meeting-button" 
+      onClick={() => window.location.href = '/videocall'}
+      title="Start video meeting"
+      style={{
+        backgroundColor: "#4a86e8",
+        color: "white",
+        border: "none",
+        borderRadius: "4px",
+        padding: "8px 12px",
+        marginRight: "10px",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        fontSize: "14px"
+      }}
+    >
+      <span style={{ marginRight: "5px" }}>📹</span> Video Meeting
+    </button>
+    <button 
+      className="summary-button" 
+      onClick={toggleSummary}
+      title="Show conversation summary"
+    >
+      {showSummary ? "Hide Summary" : "Show Summary"}
+    </button>
+  </div>
+</div>
       
       {showSummary && (
         <ChannelSummary 
