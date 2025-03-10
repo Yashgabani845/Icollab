@@ -658,7 +658,27 @@ app.post('/api/workspaces/:workspaceName/channels/:channelId/messages', async (r
     res.status(500).json({ message: "Failed to send message" });
   }
 });
+app.get('/api/workspaces/:workspaceName/channels/:channelId/summary', async (req, res) => {
+  try {
+    const workspace = await Workspace.findOne({ name: req.params.workspaceName });
 
+    if (!workspace) return res.status(404).json({ message: "Workspace not found" });
+
+    const channel = workspace.chat.channels.id(req.params.channelId);
+
+    if (!channel) return res.status(404).json({ message: "Channel not found" });
+
+    const messages = channel.messages;
+
+    // Send messages to Python summarizer
+    const response = await axios.post('http://localhost:5002/summarize', { messages });
+
+    res.status(200).json({ summary: response.data.summary });
+  } catch (error) {
+    console.error("Error summarizing chat:", error);
+    res.status(500).json({ message: "Failed to summarize chat" });
+  }
+});
 app.get('/api/workspaces/:workspaceName/channels/:channelId/messages', async (req, res) => {
   try {
     const workspace = await Workspace.findOne({ name: req.params.workspaceName });
@@ -1011,6 +1031,33 @@ app.get('/api/workspaces/:workspaceId/users', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+app.get('/api/workspaces/name/:workspaceName/users', async (req, res) => {
+  try {
+    const { workspaceName } = req.params;
+
+    const workspace = await Workspace.findOne({ name: workspaceName }).populate('members.userId', '-password');
+
+    if (!workspace) {
+      return res.status(404).json({ message: 'Workspace not found' });
+    }
+
+    const users = workspace.members.map(member => ({
+      _id: member.userId._id,
+      firstName: member.userId.firstName,
+      lastName: member.userId.lastName,
+      email: member.userId.email,
+      avatar: member.userId.avatar,
+      status: member.userId.status,
+      role: member.role,
+    }));
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Error fetching workspace users:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Assign PR or issue to a user
 app.patch('/api/projects/:projectId/:type/:itemId/assign', async (req, res) => {
   try {

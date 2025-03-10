@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import "../../CSS/Dashboard/WorkspaceDetails.css";
 import axios from "axios";
 import ChannelChat from "../../components/Chat/ChannelChat";
+import CreateChannel from "./CreateChannel"; // Import CreateChannel
 
 const WorkspaceDetail = () => {
   const { workspaceName } = useParams();
@@ -11,14 +12,15 @@ const WorkspaceDetail = () => {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showModal, setShowModal] = useState(false); // State for modal visibility
 
   useEffect(() => {
     const fetchWorkspace = async () => {
       try {
-        const userId = localStorage.getItem("email"); // Retrieve userId from local storage (or use a global state)
+        const userId = localStorage.getItem("email");
 
         const res = await axios.get(`http://localhost:5000/api/workspaces/${workspaceName}`, {
-          params: { userId }, // Send userId in query parameters
+          params: { userId },
         });
         setWorkspace(res.data);
         setChannels(res.data.chat.channels);
@@ -38,49 +40,19 @@ const WorkspaceDetail = () => {
 
   return (
     <div className="workspace-container">
-      {/* Navigation Bar */}
-      <div className="navbar">
-        <h2>{workspace?.name || "Workspace"}</h2>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <Link 
-            to={`/workspace/${workspace._id}/projects`} 
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#4a90e2',
-              color: 'white',
-              borderRadius: '4px',
-              textDecoration: 'none',
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'background-color 0.3s'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#3a7bc8'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4a90e2'}
-          >
-            <span style={{ fontSize: '18px' }}>🚀</span> Explore Projects
-          </Link>
-          <Link 
-            to="/" 
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#f0f0f0',
-              color: '#333',
-              borderRadius: '4px',
-              textDecoration: 'none',
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              transition: 'background-color 0.3s'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-          >
-            Exit
-          </Link>
-        </div>
-      </div>
+    <div className="navbar">
+  <h2>{workspace?.name || "Workspace"}</h2>
+  
+  <div className="navbar-buttons">
+    <Link to={`/workspace/${workspace._id}/projects`} className="explore-projects-btn">
+      🚀 Explore Projects
+    </Link>
+    <Link to="/" className="exit-btn">
+      Exit
+    </Link>
+  </div>
+</div>
+
 
       <div className="workspace-content">
         {/* Sidebar for Channels */}
@@ -101,9 +73,9 @@ const WorkspaceDetail = () => {
               ))}
             </ul>
           )}
-          <Link to={`/workspace/${workspaceName}/create-channel`} className="create-channel-btn2">
+          <button className="create-channel-btn2" onClick={() => setShowModal(true)}>
             + Create Channel
-          </Link>
+          </button>
         </div>
 
         {/* Main Content Area */}
@@ -119,6 +91,15 @@ const WorkspaceDetail = () => {
           )}
         </div>
       </div>
+
+      {/* Modal for Create Channel */}
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <CreateChannel workspaceName={workspaceName} closeModal={() => setShowModal(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
