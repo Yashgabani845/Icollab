@@ -1,0 +1,407 @@
+/* HowItWorksTimeline.css */
+:root {
+    --primary-black: #212529;
+    --primary-white: #f8f9fa;
+    --accent-gray: #dee2e6;
+    --shadow-light: rgba(0, 0, 0, 0.1);
+    --shadow-dark: rgba(0, 0, 0, 0.2);
+    --transition-standard: all 0.3s ease;
+  }
+  
+  .how-it-works-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 4rem auto;
+    padding: 2rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Header Styling */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4rem;
+    position: relative;
+  }
+  
+  .section-header h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    text-align: center;
+    color: var(--primary-black);
+    margin: 0 1.5rem;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .header-shape {
+    height: 4px;
+    flex-grow: 1;
+    background: linear-gradient(90deg, transparent, var(--primary-black), transparent);
+    border-radius: 2px;
+    max-width: 100px;
+  }
+  
+  /* Timeline Structure */
+  .timeline-wrapper {
+    position: relative;
+    padding: 1rem 0;
+  }
+  
+  .timeline-step {
+    display: flex;
+    margin-bottom: 6rem;
+    position: relative;
+    flex-direction: row; /* All steps have the same direction now */
+  }
+  
+  .timeline-step:last-child {
+    margin-bottom: 3rem;
+  }
+  
+  /* Remove the odd/even specific styling */
+  /* .timeline-step.even {
+    flex-direction: row;
+  }
+  
+  .timeline-step.odd {
+    flex-direction: row-reverse;
+  } */
+  
+  /* Connector Styling */
+  .step-connector {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80px;
+    z-index: 2;
+  }
+  
+  .connector-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--primary-black);
+    color: var(--primary-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 12px var(--shadow-light);
+    z-index: 2;
+    border: 3px solid var(--primary-white);
+    transition: var(--transition-standard);
+  }
+  
+  .timeline-step:hover .connector-circle {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px var(--shadow-dark);
+  }
+  
+  .connector-line {
+    width: 4px;
+    height: calc(100% + 6rem);
+    background-color: var(--accent-gray);
+    position: absolute;
+    top: 50px;
+    z-index: 1;
+  }
+  
+  /* Card Styling */
+  .step-card {
+    flex: 1;
+    color: var(--accent-color, var(--primary-black));
+    border-radius: 16px;
+    box-shadow: 0 8px 24px var(--shadow-light);
+    padding: 2rem;
+    position: relative;
+    transition: var(--transition-standard);
+    max-width: calc(100% - 100px);
+  }
+  
+  .timeline-step:hover .step-card {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px var(--shadow-dark);
+  }
+  
+  .step-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid rgba(128, 128, 128, 0.2);
+    padding-bottom: 1rem;
+  }
+  
+  .step-emoji {
+    font-size: 2rem;
+    margin-right: 1rem;
+    line-height: 1;
+  }
+  
+  .step-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-right: 0.75rem;
+  }
+  
+  .step-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  
+  .step-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  /* Image Styling */
+  .step-image-container {
+    position: relative;
+    padding: 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .step-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+    aspect-ratio: 16/9;
+    display: block;
+    transition: var(--transition-standard);
+    transform-origin: center;
+    z-index: 2;
+    position: relative;
+  }
+  
+  .timeline-step:hover .step-image {
+    transform: scale(1.03);
+  }
+  
+  /* Decorative Shapes */
+  .shape-decorator {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    z-index: 1;
+    opacity: 0.6;
+    transition: var(--transition-standard);
+  }
+  
+  .top-left {
+    top: 0;
+    left: 0;
+    border-top: 4px solid var(--accent-color, var(--primary-black));
+    border-left: 4px solid var(--accent-color, var(--primary-black));
+    border-top-left-radius: 8px;
+  }
+  
+  .top-right {
+    top: 0;
+    right: 0;
+    border-top: 4px solid var(--accent-color, var(--primary-black));
+    border-right: 4px solid var(--accent-color, var(--primary-black));
+    border-top-right-radius: 8px;
+  }
+  
+  .bottom-left {
+    bottom: 0;
+    left: 0;
+    border-bottom: 4px solid var(--accent-color, var(--primary-black));
+    border-left: 4px solid var(--accent-color, var(--primary-black));
+    border-bottom-left-radius: 8px;
+  }
+  
+  .bottom-right {
+    bottom: 0;
+    right: 0;
+    border-bottom: 4px solid var(--accent-color, var(--primary-black));
+    border-right: 4px solid var(--accent-color, var(--primary-black));
+    border-bottom-right-radius: 8px;
+  }
+  
+  .timeline-step:hover .shape-decorator {
+    width: 50px;
+    height: 50px;
+    opacity: 0.8;
+  }
+  
+  /* Info Styling */
+  .step-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  
+  .step-icon-container {
+    background-color: rgba(128, 128, 128, 0.1);
+    padding: 1rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: var(--transition-standard);
+  }
+  
+  .timeline-step:hover .step-icon-container {
+    transform: rotate(10deg);
+  }
+  
+  .step-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+  
+  /* Next Step Indicator */
+  .step-next {
+    position: absolute;
+    bottom: -28px;
+    right: 50%; /* Changed from left to right for consistent direction */
+    transform: translateX(50%); /* Changed to match new position */
+    width: 40px;
+    height: 40px;
+    background-color: var(--bg-color, var(--primary-white));
+    border: 2px solid var(--accent-color, var(--primary-black));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-color, var(--primary-black));
+    z-index: 3;
+    transition: var(--transition-standard);
+  }
+  
+  .timeline-step:hover .step-next {
+    transform: translateX(50%) scale(1.1); /* Updated transform */
+    box-shadow: 0 4px 8px var(--shadow-light);
+  }
+  
+  /* CTA Section */
+  .cta-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    position: relative;
+    padding: 2rem 0;
+  }
+  
+  .cta-button {
+    background-color: var(--primary-black);
+    color: var(--primary-white);
+    border: none;
+    border-radius: 30px;
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px var(--shadow-light);
+    transition: var(--transition-standard);
+    position: relative;
+    z-index: 2;
+  }
+  
+  .cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px var(--shadow-dark);
+    background-color: #000;
+  }
+  
+  .cta-blob {
+    position: absolute;
+    width: 150px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: rgba(222, 226, 230, 0.3);
+    z-index: 1;
+  }
+  
+  .cta-blob:first-child {
+    left: 20%;
+    transform: rotate(-20deg) scale(1.2);
+  }
+  
+  .cta-blob:last-child {
+    right: 20%;
+    transform: rotate(20deg) scale(0.8);
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 992px) {
+    .timeline-step {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 40px;
+    }
+    
+    .step-connector {
+      position: absolute;
+      left: -40px;
+      top: 0;
+      height: 100%;
+    }
+    
+    .connector-line {
+      height: calc(100% + 6rem);
+    }
+    
+    .step-card {
+      max-width: 100%;
+    }
+    
+    .step-content {
+      flex-direction: column;
+    }
+    
+    .step-next {
+      left: calc(100% - 20px);
+      right: auto;
+      transform: translateX(-50%);
+    }
+    
+    .timeline-step:hover .step-next {
+      transform: translateX(-50%) scale(1.1);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .section-header h2 {
+      font-size: 2rem;
+    }
+    
+    .step-info {
+      flex-direction: column;
+    }
+    
+    .step-icon-container {
+      margin-bottom: 1rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .how-it-works-container {
+      padding: 1rem;
+    }
+    
+    .section-header h2 {
+      font-size: 1.75rem;
+    }
+    
+    .step-card {
+      padding: 1.5rem;
+    }
+    
+    .step-header {
+      flex-wrap: wrap;
+    }
+  }

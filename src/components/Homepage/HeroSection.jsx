@@ -44,15 +44,13 @@ const HeroSection = () => {
           <div className="hero-card card-side animate-on-mount">
             {/* Previous analytics card content */}
             <div className="card-content">
-              <h3>Team Analytics</h3>
               <div className="metric">
-                <span className="number">95%</span>
-                <span className="label">Team Efficiency</span>
+                <span className="number">Free Forever</span>
               </div>
               <div className="activity-graph">
                 <div className="graph-line"></div>
               </div>
-              <p>Active team performance this week</p>
+              <p>With integration features</p>
             </div>
           </div>
 
@@ -79,7 +77,7 @@ const HeroSection = () => {
               </div>
              
               <p className="card-footer">
-                Join 10,000+ teams already collaborating
+                Join teams already collaborating
               </p>
             </div>
           </div>
