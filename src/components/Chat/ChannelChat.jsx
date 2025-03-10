@@ -1,16 +1,15 @@
-
 import { useEffect, useState, useRef } from "react"
 import axios from "axios"
 import io from "socket.io-client"
 import "./cchat.css"
+import ChannelSummary from "./ChannelSummary"
 
 const ChannelChat = ({ channel, wname }) => {
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
-  const [typingUser, setTypingUser] = useState("")
-  const userEmail = localStorage.getItem("email")
   const [typingUsers, setTypingUsers] = useState([])
+  const [showSummary, setShowSummary] = useState(false)
+  const userEmail = localStorage.getItem("email")
 
   // Extract username from email (everything before @)
   const userId = userEmail ? userEmail.split("@")[0] : "user"
@@ -129,6 +128,10 @@ const ChannelChat = ({ channel, wname }) => {
     })
   }
 
+  const toggleSummary = () => {
+    setShowSummary(!showSummary)
+  }
+
   const formatDate = (timestamp) => {
     const date = new Date(timestamp)
     const today = new Date()
@@ -186,7 +189,25 @@ const ChannelChat = ({ channel, wname }) => {
 
   return (
     <div className="chat-container">
-      <h2>{channel?.name} Chat</h2>
+      <div className="chat-header">
+        <h2>{channel?.name} Chat</h2>
+        <button 
+          className="summary-button" 
+          onClick={toggleSummary}
+          title="Show conversation summary"
+        >
+          {showSummary ? "Hide Summary" : "Show Summary"}
+        </button>
+      </div>
+      
+      {showSummary && (
+        <ChannelSummary 
+          channelId={channel._id} 
+          workspaceName={wname} 
+          onClose={toggleSummary}
+        />
+      )}
+
       <div className="messages">
         {groupedMessages.map((item, index) => {
           if (item.type === "date") {
@@ -263,4 +284,3 @@ const ChannelChat = ({ channel, wname }) => {
 }
 
 export default ChannelChat
-
