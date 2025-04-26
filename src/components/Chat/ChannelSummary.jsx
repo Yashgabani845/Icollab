@@ -34,6 +34,7 @@ const ChannelSummary = ({ channelId, workspaceName, onClose }) => {
 
   useEffect(() => {
     fetchSummary();
+    console.log(summary)
   }, [fetchSummary]);
 
   const handleTimeframeChange = (e) => {
@@ -82,7 +83,7 @@ const ChannelSummary = ({ channelId, workspaceName, onClose }) => {
             </button>
           </div>
         ) : (
-          <div className="summary-text">
+          <div className="summary-text" style={{marginBottom:"15px" ,overflow:"scroll"}}>
             <p>{summary}</p>
           </div>
         )}
