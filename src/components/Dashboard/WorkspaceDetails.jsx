@@ -39,7 +39,7 @@ const WorkspaceDetail = () => {
   if (error) return <p className="error-message">{error}</p>;
 
   return (
-    <div className="workspace-container">
+    <div className="wc-con">
     <div className="navbar">
   <h2>{workspace?.name || "Workspace"}</h2>
   

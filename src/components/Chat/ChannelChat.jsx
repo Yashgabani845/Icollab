@@ -269,23 +269,8 @@ const ChannelChat = ({ channel, wname }) => {
         <div ref={messagesEndRef} />
       </div>
       <div className="chat-input-container">
-        <div className="chat-toolbar">
-          <button className="toolbar-button" title="Attach File">
-            📎 File
-          </button>
-          <button className="toolbar-button" title="Insert Image">
-            🖼️ Image
-          </button>
-          <button className="toolbar-button" title="Insert Emoji">
-            😊 Emoji
-          </button>
-          <button className="toolbar-button" title="Format Text">
-            📝 Format
-          </button>
-          <button className="toolbar-button" title="Record Audio">
-            🎤 Audio
-          </button>
-        </div>
+        
+        
         <div className="chat-input-row">
           <input
             type="text"

@@ -148,70 +148,27 @@ const Taskboard = () => {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Design new landing page</td>
+                    <td>DSA</td>
                     <td><span className="rd-status rd-status-progress">In Progress</span></td>
                     <td><span className="rd-priority rd-priority-high">High</span></td>
-                    <td>Oct 15, 2023</td>
-                    <td>John Doe</td>
+                    <td>May 15, 2025</td>
+                    <td>Yash Gabani</td>
                   </tr>
                   <tr>
-                    <td>Update user documentation</td>
+                    <td>Code Review</td>
                     <td><span className="rd-status rd-status-todo">To Do</span></td>
                     <td><span className="rd-priority rd-priority-medium">Medium</span></td>
-                    <td>Oct 20, 2023</td>
-                    <td>Jane Smith</td>
+                    <td>May 20, 2025</td>
+                    <td>Meet Thakkar</td>
                   </tr>
-                  <tr>
-                    <td>Fix navigation bug</td>
-                    <td><span className="rd-status rd-status-done">Done</span></td>
-                    <td><span className="rd-priority rd-priority-high">High</span></td>
-                    <td>Oct 10, 2023</td>
-                    <td>Mike Johnson</td>
-                  </tr>
+                  
                 </tbody>
               </table>
             </div>
           </div>
         );
       
-      case 'calendar':
-        return (
-          <div className="rd-section-content">
-            <div className="rd-section-header">
-              <h2>Calendar View</h2>
-              <p>View your tasks in a calendar format</p>
-            </div>
-            <div className="rd-calendar-container">
-              <div className="rd-calendar-header">
-                <button className="rd-calendar-nav-btn">&lt;</button>
-                <h3>October 2023</h3>
-                <button className="rd-calendar-nav-btn">&gt;</button>
-              </div>
-              <div className="rd-calendar-weekdays">
-                <div>Sun</div>
-                <div>Mon</div>
-                <div>Tue</div>
-                <div>Wed</div>
-                <div>Thu</div>
-                <div>Fri</div>
-                <div>Sat</div>
-              </div>
-              <div className="rd-calendar-days">
-                {Array.from({ length: 31 }, (_, i) => (
-                  <div key={i} className={`rd-calendar-day ${i === 14 ? 'rd-calendar-day-active' : ''}`}>
-                    <span className="rd-day-number">{i + 1}</span>
-                    {i === 14 && (
-                      <div className="rd-calendar-event">Design new landing page</div>
-                    )}
-                    {i === 19 && (
-                      <div className="rd-calendar-event">Update documentation</div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
+     
       
       case 'notifications':
         return (
@@ -226,8 +183,8 @@ const Taskboard = () => {
                   <CheckSquare size={18} />
                 </div>
                 <div className="rd-notification-content">
-                  <p className="rd-notification-text"><strong>John Doe</strong> completed task <strong>"Design new landing page"</strong></p>
-                  <p className="rd-notification-time">2 hours ago</p>
+                  <p className="rd-notification-text"><strong>Gabani Yash</strong>  created <strong>"new task"</strong></p>
+                  <p className="rd-notification-time"></p>
                 </div>
               </div>
               <div className="rd-notification rd-notification-unread">
@@ -235,8 +192,8 @@ const Taskboard = () => {
                   <Plus size={18} />
                 </div>
                 <div className="rd-notification-content">
-                  <p className="rd-notification-text"><strong>Jane Smith</strong> assigned you to <strong>"Update user documentation"</strong></p>
-                  <p className="rd-notification-time">Yesterday</p>
+                  <p className="rd-notification-text"><strong>Gabani Yash </strong> created  <strong>"the new task"</strong></p>
+                  <p className="rd-notification-time"></p>
                 </div>
               </div>
               <div className="rd-notification">
@@ -244,8 +201,7 @@ const Taskboard = () => {
                   <Clock size={18} />
                 </div>
                 <div className="rd-notification-content">
-                  <p className="rd-notification-text">Task <strong>"Fix navigation bug"</strong> is due tomorrow</p>
-                  <p className="rd-notification-time">2 days ago</p>
+                  <p className="rd-notification-text">Task <strong>"DSA"</strong> is due tomorrow</p>
                 </div>
               </div>
             </div>
@@ -383,13 +339,7 @@ const Taskboard = () => {
             <Table className="rd-nav-icon" />
             <span>Table</span>
           </div>
-          <div 
-            className={`rd-nav-item ${activeSection === 'calendar' ? 'rd-nav-item-active' : ''}`}
-            onClick={() => setActiveSection('calendar')}
-          >
-            <Calendar className="rd-nav-icon" />
-            <span>Calendar</span>
-          </div>
+         
           <div 
             className={`rd-nav-item ${activeSection === 'notifications' ? 'rd-nav-item-active' : ''}`}
             onClick={() => setActiveSection('notifications')}
@@ -397,13 +347,7 @@ const Taskboard = () => {
             <Bell className="rd-nav-icon" />
             <span>Notifications</span>
           </div>
-          <div 
-            className={`rd-nav-item ${activeSection === 'settings' ? 'rd-nav-item-active' : ''}`}
-            onClick={() => setActiveSection('settings')}
-          >
-            <Settings className="rd-nav-icon" />
-            <span>Settings</span>
-          </div>
+        
           <div 
             className={`rd-nav-item ${activeSection === 'help' ? 'rd-nav-item-active' : ''}`}
             onClick={() => setActiveSection('help')}
@@ -413,28 +357,15 @@ const Taskboard = () => {
           </div>
         </nav>
 
-        <div className="rd-sidebar-favorites">
-          <h3>Favorites</h3>
-          <div className="rd-favorite-item">
-            <Star className="rd-favorite-icon" />
-            <span>Marketing Campaign</span>
-          </div>
-          <div className="rd-favorite-item">
-            <Star className="rd-favorite-icon" />
-            <span>Product Launch</span>
-          </div>
-        </div>
+        
 
         <div className="rd-sidebar-recent">
           <h3>Recent</h3>
           <div className="rd-recent-item">
             <Clock className="rd-recent-icon" />
-            <span>Website Redesign</span>
+            <span>DSA</span>
           </div>
-          <div className="rd-recent-item">
-            <Clock className="rd-recent-icon" />
-            <span>Q4 Planning</span>
-          </div>
+         
         </div>
       </div>
 
