@@ -83,7 +83,7 @@ const ChannelSummary = ({ channelId, workspaceName, onClose }) => {
             </button>
           </div>
         ) : (
-          <div className="summary-text" style={{marginBottom:"15px" ,overflow:"scroll"}}>
+          <div className="summary-text">
             <p>{summary}</p>
           </div>
         )}

@@ -1,95 +1,131 @@
 .channel-summary-container {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin: 16px 0;
-    padding: 16px;
-    max-width: 100%;
-  }
-  
-  .channel-summary-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .channel-summary-header h3 {
-    margin: 0;
-    color: #333;
-  }
-  
-  .close-button {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #666;
-  }
-  
-  .close-button:hover {
-    color: #333;
-  }
-  
-  .summary-timeframe {
-    margin-bottom: 16px;
-  }
-  
-  .summary-timeframe select {
-    padding: 6px 10px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    margin-left: 8px;
-  }
-  
-  .summary-content {
-    background-color: #f9f9f9;
-    border-radius: 6px;
-    padding: 16px;
-    min-height: 100px;
-  }
-  
-  .loading-indicator {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100px;
-  }
-  
-  .spinner {
-    width: 30px;
-    height: 30px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #4a90e2;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 10px;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  .error-message {
-    color: #d9534f;
-    text-align: center;
-  }
-  
-  .error-message button {
-    background-color: #5cb85c;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 6px 12px;
-    margin-top: 8px;
-    cursor: pointer;
-  }
-  
-  .summary-text {
-    line-height: 1.5;
-    color: #333;
-  }
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  max-width: 700px;
+  width: 100%;
+  margin: 20px auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.channel-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.channel-summary-header h3 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 26px;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.close-button:hover {
+  color: #e74c3c;
+}
+
+.summary-timeframe {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.summary-timeframe label {
+  font-weight: 500;
+  color: #555;
+  margin-right: 10px;
+}
+
+.summary-timeframe select {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #fafafa;
+  font-size: 15px;
+  transition: border-color 0.3s;
+}
+
+.summary-timeframe select:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.summary-content {
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  padding: 20px;
+  min-height: 150px;
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e0e0;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-indicator p {
+  font-size: 16px;
+  color: #666;
+}
+
+.error-message {
+  color: #c0392b;
+  text-align: center;
+  font-size: 16px;
+}
+
+.error-message button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  margin-top: 12px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.error-message button:hover {
+  background-color: #c0392b;
+}
+
+.summary-text {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  white-space: pre-wrap;
+}
