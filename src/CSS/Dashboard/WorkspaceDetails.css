@@ -24,7 +24,7 @@
 }
 
 /* Main container */
-.workspace-container {
+.wc-con {
   display: flex;
   flex-direction: column;
   height: 100vh;

@@ -1,109 +1,204 @@
-/* Workspace Container */
+/* Workspace Component CSS */
+
+/* Main Container */
 .workspace-container {
-  font-family: 'Poppins', sans-serif;
-  padding: 0px;
-  background-color: #f4f4f9;
-  min-height: 87vh;
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  margin: 2rem auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  min-height: 600px;
 }
 
-/* Title Styling */
-h1 {
-  text-align: center;
-  color: #2c3e50;
-  font-size: 2rem;
+/* Page Title */
+.workspace-container h1 {
+  font-size: 1.8rem;
   font-weight: 600;
-  margin-bottom: 30px;
+  color: #111;
+  margin-bottom: 2rem;
+  padding-left: 2rem;
 }
 
-/* Workspace List - Grid Layout */
+/* Back Button */
+.back-button {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #f0f0f0;
+  transform: translateX(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.back-button svg {
+  width: 20px;
+  height: 20px;
+  stroke: #333;
+  stroke-width: 2;
+  transition: stroke 0.2s ease;
+}
+
+.back-button:hover svg {
+  stroke: #000;
+}
+
+/* Workspace List */
 .workspace-list {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 /* Workspace Card */
 .workspace-card {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  text-align: center;
+  background-color: #fff;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
 }
 
 .workspace-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  border-color: #d0d0d0;
 }
 
-/* Card Heading */
 .workspace-card h2 {
-  font-size: 1.8rem;
-  color: #3498db;
-  margin-bottom: 12px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 1rem;
 }
 
-/* Card Paragraphs */
 .workspace-card p {
-  font-size: 1rem;
   color: #555;
-  margin-bottom: 8px;
-}
-
-/* Error Message */
-.error {
-  color: red;
-  text-align: center;
-  font-size: 1.2rem;
-  margin-top: 20px;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 /* Enter Workspace Button */
 .enter-workspace-button {
-  background-color: silver;
-  color: black;
+  margin-top: auto;
+  background-color: #222;
+  color: #fff;
   border: none;
-  padding: 12px 20px;
-  font-size: 1rem;
-  border-radius: 8px;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: all 0.2s ease;
+  width: 100%;
+  margin-top: 1.5rem;
 }
 
 .enter-workspace-button:hover {
-  background-color: #b0b0b0;
-  transform: scale(1.05);
+  background-color: #000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
-
 
 /* Create Workspace Button */
 .workspace-btn1 {
   position: fixed;
-  bottom: 40px;
-  right: 40px;
-  background-color: rgb(199, 199, 199);
-  color: black;
+  bottom: 2rem;
+  right: 2rem;
+  background-color: #222;
+  color: #fff;
   border: none;
-  padding: 15px 25px;
-  font-size: 1rem;
   border-radius: 50px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .workspace-btn1:hover {
-  background-color: #b0b0b0;
-  transform: scale(1.1);
+  background-color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
-.workspace-btn1 a {
+.workspace-btn-link {
+  color: #fff;
   text-decoration: none;
-  color: black;
+}
+
+/* Loading and Error States */
+.workspace {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  font-size: 1.2rem;
+  color: #555;
+}
+
+.workspace.error {
+  color: #d32f2f;
+}
+
+/* Empty State */
+.workspace-container > p {
+  text-align: center;
+  color: #666;
+  font-size: 1.1rem;
+  margin: 3rem 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .workspace-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .workspace-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .workspace-btn1 {
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+  
+  .back-button {
+    top: 1rem;
+    left: 1rem;
+  }
+}
+
+/* For very small screens */
+@media (max-width: 480px) {
+  .workspace-container h1 {
+    font-size: 1.5rem;
+    padding-left: 1.5rem;
+  }
+  
+  .workspace-card {
+    padding: 1.25rem;
+  }
 }
