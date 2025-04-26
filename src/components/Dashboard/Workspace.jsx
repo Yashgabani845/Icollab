@@ -58,15 +58,16 @@ const Workspace = () => {
         <div className="workspace-list">
           {workspaces.map((workspace) => (
             <div className="workspace-card" key={workspace._id}>
-              <h2>{workspace.name}</h2>
-              <p>
-                Created by: {workspace.createdBy ? `${workspace.createdBy.email}` : "Unknown"}
-              </p>
-              <p>
-                Members: {workspace.members.length > 0
-                  ? workspace.members.map((member) => `${member.userId.email}`).join(", ")
-                  : "No members"}
-              </p>
+              <div className="workspace-details">
+                <center><h2>{workspace.name}</h2></center>
+                <p><span className="label">Created By:</span> {workspace.createdBy?.email || "Unknown"}</p>
+                <p>
+                  <span className="label">Members:</span>
+                  {workspace.members.length > 0
+                    ? workspace.members.map((member) => member.userId?.email).join(", ")
+                    : "No members"}
+                </p>
+              </div>
               <button
                 className="enter-workspace-button"
                 onClick={() => navigate(`/workspace/${workspace.name}`)}
@@ -75,6 +76,7 @@ const Workspace = () => {
               </button>
             </div>
           ))}
+
         </div>
       ) : (
         <p>No workspaces found.</p>
