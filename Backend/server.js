@@ -363,13 +363,13 @@ app.get("/api/profile", async (req, res) => {
 
   try {
     // Fetch user details
-    const user = await User.findOne({ email }).select("email name role phone"); // Adjust fields as needed
+    const user = await User.findOne({ email }).select("email firstName lastName role phone"); // Adjust fields as needed
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     // Fetch workspaces created by the user
-    const workspaces = await Workspace.find({ createdBy: user._id });
+    const workspaces = await Workspace.find({ createdBy: user._id }).select("name description");
     if (!workspaces) {
       return res.status(404).json({ message: "No workspaces found" });
     }
