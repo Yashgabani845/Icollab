@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import ChatSummarizerService from "../../services/ChatSummarizerService";
 import "./ChannelSummary.css";
 
@@ -7,33 +7,42 @@ const ChannelSummary = ({ channelId, workspaceName, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [timeframe, setTimeframe] = useState(24); // Default: 24 hours
+  const [retrying, setRetrying] = useState(false);
 
-  useEffect(() => {
-    fetchSummary();
-  }, [channelId, workspaceName, timeframe]);
+  const fetchSummary = useCallback(async () => {
+    if (!channelId || !workspaceName) return;
 
-  const fetchSummary = async () => {
     setLoading(true);
     setError("");
-    
+    setRetrying(false);
+
     try {
       const response = await ChatSummarizerService.getChannelSummary(
         workspaceName, 
-        channelId,
+        channelId, 
         timeframe
       );
-      
-      setSummary(response.summary);
-      setLoading(false);
+
+      setSummary(response.summary || "No recent conversation to summarize.");
     } catch (err) {
       console.error("Error fetching summary:", err);
       setError("Failed to fetch summary. Please try again.");
+    } finally {
       setLoading(false);
     }
-  };
+  }, [channelId, workspaceName, timeframe]);
+
+  useEffect(() => {
+    fetchSummary();
+  }, [fetchSummary]);
 
   const handleTimeframeChange = (e) => {
-    setTimeframe(parseInt(e.target.value));
+    setTimeframe(parseInt(e.target.value, 10));
+  };
+
+  const handleRetry = () => {
+    setRetrying(true);
+    fetchSummary();
   };
 
   return (
@@ -42,9 +51,9 @@ const ChannelSummary = ({ channelId, workspaceName, onClose }) => {
         <h3>Channel Conversation Summary</h3>
         <button className="close-button" onClick={onClose}>×</button>
       </div>
-      
+
       <div className="summary-timeframe">
-        <label htmlFor="timeframe">Timeframe: </label>
+        <label htmlFor="timeframe">Timeframe:</label>
         <select 
           id="timeframe" 
           value={timeframe} 
@@ -58,7 +67,7 @@ const ChannelSummary = ({ channelId, workspaceName, onClose }) => {
           <option value="168">Last week</option>
         </select>
       </div>
-      
+
       <div className="summary-content">
         {loading ? (
           <div className="loading-indicator">
@@ -68,7 +77,9 @@ const ChannelSummary = ({ channelId, workspaceName, onClose }) => {
         ) : error ? (
           <div className="error-message">
             <p>{error}</p>
-            <button onClick={fetchSummary}>Try Again</button>
+            <button onClick={handleRetry} disabled={retrying}>
+              {retrying ? "Retrying..." : "Try Again"}
+            </button>
           </div>
         ) : (
           <div className="summary-text">

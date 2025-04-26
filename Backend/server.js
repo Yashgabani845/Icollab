@@ -689,25 +689,52 @@ app.post('/api/workspaces/:workspaceName/channels/:channelId/messages', async (r
     res.status(500).json({ message: "Failed to send message" });
   }
 });
+const { decode } = require('html-entities'); // install if needed
+
 app.get('/api/workspaces/:workspaceName/channels/:channelId/summary', async (req, res) => {
   try {
-    const workspace = await Workspace.findOne({ name: req.params.workspaceName });
+    const { workspaceName, channelId } = req.params;
+    const { timeframe = 24 } = req.query; // timeframe in hours
+
+    const workspace = await Workspace.findOne({ name: decodeURIComponent(workspaceName) })
+      .populate('chat.channels.messages.sender', 'name email');
 
     if (!workspace) return res.status(404).json({ message: "Workspace not found" });
 
-    const channel = workspace.chat.channels.id(req.params.channelId);
-
+    const channel = workspace.chat.channels.id(channelId);
     if (!channel) return res.status(404).json({ message: "Channel not found" });
 
-    const messages = channel.messages;
+    // Filter messages based on timeframe
+    const now = new Date();
+    const timeframeStart = new Date(now.getTime() - timeframe * 60 * 60 * 1000);
 
-    // Send messages to Python summarizer
-    const response = await axios.post('http://localhost:5002/summarize', { messages });
+    const recentMessages = channel.messages.filter(msg => new Date(msg.timestamp) >= timeframeStart);
 
-    res.status(200).json({ summary: response.data.summary });
+    if (recentMessages.length === 0) {
+      return res.status(200).json({ summary: "No recent messages to summarize." });
+    }
+
+    // Format messages into chat text (as expected by summarizer model)
+    const formattedChat = recentMessages.map((msg) => {
+      const senderName = msg.sender?.name || msg.sender?.email?.split('@')[0] || "User";
+      return `${senderName}: ${msg.content}`;
+    }).join('\n');
+
+    console.log("Formatted Chat sent to Summarizer Service:", formattedChat.substring(0, 500)); // optional: print preview
+
+    // Send to Summarizer Service
+    const response = await axios.post('http://localhost:5002/summarize', {
+      chat: formattedChat
+    });
+
+    if (response.data && response.data.summary) {
+      res.status(200).json({ summary: response.data.summary });
+    } else {
+      res.status(500).json({ message: "Failed to summarize chat" });
+    }
   } catch (error) {
     console.error("Error summarizing chat:", error);
-    res.status(500).json({ message: "Failed to summarize chat" });
+    res.status(500).json({ message: "Failed to summarize chat", error: error.message });
   }
 });
 app.get('/api/workspaces/:workspaceName/channels/:channelId/messages', async (req, res) => {
