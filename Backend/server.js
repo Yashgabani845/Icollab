@@ -40,7 +40,7 @@ const socketIo = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 app.use(cors({
-  origin: 'http://localhost:3000', // Your React app URL
+  origin: 'https://icollab-eta.vercel.app', // Your React app URL
   credentials: true
 }));
 
