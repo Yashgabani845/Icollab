@@ -7,6 +7,8 @@ const Workspace = require("./models/WorkSpace");
 const Project = require('./models/Project');
 const axios = require('axios');
 require('dotenv').config();
+const { Server } = require('socket.io');
+
 const User = require("./models/User")
 const TaskList = require('./models/TaskList');
 // const { Server } = require('socket.io');
@@ -36,20 +38,19 @@ connectDB();
 // const io = new Server(server, { cors: { origin: '*' } });
 // Add this to your server.js or index.js file
 const socketIo = require('socket.io');
+const emailToSocketMap = new Map();
 
 const app = express();
 const server = http.createServer(app);
 app.use(cors({
-  origin: 'https://icollab-eta.vercel.app', // Your React app URL
+  origin: ['https://icollab-eta.vercel.app' , "http://localhost:3000"], // Your React app URL
   credentials: true
 }));
 
-// Configure Socket.io with CORS
-const io = socketIo(server, {
-  cors: { 
-    origin: 'http://localhost:3000',
-    methods: ["GET", "POST"],
-    credentials: true
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
   }
 });
 // Socket.io connection handling
@@ -135,6 +136,51 @@ io.on('connection', (socket) => {
     console.log('Client disconnected');
   });
 });
+
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+  socket.on('register-email', (email) => {
+    emailToSocketMap.set(email, socket.id);
+    console.log(`Registered email: ${email} with socket ID: ${socket.id}`);
+  });
+
+  socket.on('initiate-call', ({ toEmail, offer }) => {
+    const targetSocketId = emailToSocketMap.get(toEmail);
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('incoming-call', { from: socket.id, offer });
+    } else {
+      socket.emit('user-not-found', { email: toEmail });
+    }
+  });
+
+  socket.on('accept-call', ({ to, answer }) => {
+    console.log(`Call accepted by ${socket.id}, sending to ${to}`);
+    socket.to(to).emit('call-accepted', answer);
+  });
+
+  socket.on('candidate', ({ to, candidate }) => {
+    if (to) {
+      console.log(`ICE candidate from ${socket.id} to ${to}`);
+      socket.to(to).emit('candidate', candidate);
+    }
+  });
+
+  socket.on('end-call', ({ to }) => {
+    console.log(`Call ended by ${socket.id}`);
+    socket.to(to).emit('call-ended');
+  });
+
+  socket.on('disconnect', () => {
+    for (const [email, id] of emailToSocketMap.entries()) {
+      if (id === socket.id) {
+        emailToSocketMap.delete(email);
+        console.log(`User with email ${email} disconnected`);
+        break;
+      }
+    }
+  });
+});
+
 
 // Update your API routes for messages
 app.get('/api/workspaces/:workspaceName/channels/:channelId/messages', async (req, res) => {
@@ -222,7 +268,7 @@ app.post('/api/workspaces/:workspaceName/channels/:channelId/messages', async (r
 // Update your server.listen to use the http server instead of app
 const port =  5001;
 server.listen(port, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${port}`);
 });
 app.use(cors());
 app.use(express.json());
@@ -1766,6 +1812,3 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-// server.listen(5001, () => {
-//   console.log('Server running on http://localhost:5001');
-// });
