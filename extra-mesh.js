@@ -65,19 +65,16 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Handle disconnection
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
         clients.delete(socket.id);
         
-        // Inform remaining clients about user leaving
         socket.broadcast.emit('user-left', { 
             userId: socket.id, 
             userCount: clients.size 
         });
     });
 
-    // Get current list of connected users
     socket.on('get-users', () => {
         const userList = Array.from(clients.keys()).filter(id => id !== socket.id);
         socket.emit('user-list', userList);

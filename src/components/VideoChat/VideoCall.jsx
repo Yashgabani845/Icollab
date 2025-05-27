@@ -32,7 +32,7 @@ const VideoCall = () => {
   };
 
   useEffect(() => {
-    socketRef.current = io('http://localhost:3001', {
+    socketRef.current = io('http://localhost:5001', {
       transports: ['websocket'],
       forceNew: true
     });

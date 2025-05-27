@@ -8,7 +8,6 @@ const VideoChat = () => {
     const peerConnectionRef = useRef(null);
     const [localStream, setLocalStream] = useState(null);
 
-    // Comprehensive STUN/TURN servers
     const iceServers = {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
@@ -22,14 +21,11 @@ const VideoChat = () => {
         ]
     };
 
-    // Comprehensive logging function
     const debugLog = (message, ...args) => {
         console.log(`[WebRTC Debug] ${message}`, ...args);
     };
 
-    // Create peer connection with extensive error handling
     const createPeerConnection = () => {
-        // Close existing connection
         if (peerConnectionRef.current) {
             debugLog('Closing existing peer connection');
             peerConnectionRef.current.close();
@@ -38,7 +34,6 @@ const VideoChat = () => {
         const pc = new RTCPeerConnection(iceServers);
         peerConnectionRef.current = pc;
 
-        // Track connection states
         pc.onconnectionstatechange = () => {
             debugLog('Connection State:', pc.connectionState);
         };
@@ -47,7 +42,6 @@ const VideoChat = () => {
             debugLog('ICE Connection State:', pc.iceConnectionState);
         };
 
-        // Handle ICE candidates
         pc.onicecandidate = (event) => {
             if (event.candidate) {
                 debugLog('Local ICE Candidate:', event.candidate);
@@ -57,7 +51,6 @@ const VideoChat = () => {
             }
         };
 
-        // Handle incoming tracks
         pc.ontrack = (event) => {
             debugLog('Remote Track Received:', event.track);
             debugLog('Remote Streams:', event.streams);
@@ -80,7 +73,7 @@ const VideoChat = () => {
 
     // Initialize Socket Connection
     useEffect(() => {
-        const socket = io('http://localhost:3001', { 
+        const socket = io('http://localhost:5001', { 
             transports: ['websocket'],
             forceNew: true 
         });
@@ -164,10 +157,8 @@ const VideoChat = () => {
                 });
             }
 
-            // Create peer connection and send offer
             const pc = createPeerConnection();
             
-            // Add local tracks to peer connection
             stream.getTracks().forEach(track => {
                 debugLog('Adding Local Track:', track.kind);
                 pc.addTrack(track, stream);

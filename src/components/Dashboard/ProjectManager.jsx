@@ -19,13 +19,21 @@ const ProjectManager = () => {
         setLoading(true);
         const response = await fetch(`http://localhost:5000/api/workspaces/${workspaceId}/projects`);
         const data = await response.json();
-        setProjects(data);
+    
+        const safeData = data.map((project) => ({
+          ...project,
+          pullRequests: project.pullRequests || [],
+          issues: project.issues || [],
+        }));
+    
+        setProjects(safeData);
         setLoading(false);
       } catch (err) {
         setError('No projects');
         setLoading(false);
       }
     };
+    
 
     const fetchUsers = async () => {
       try {
@@ -192,8 +200,9 @@ const ProjectManager = () => {
                     <div className="project-info">
                       <div className="project-name">{project.name}</div>
                       <div className="project-meta">
-                        <span>{project.pullRequests.length} PRs</span>
-                        <span>{project.issues.length} Issues</span>
+                      <span>{(project.pullRequests?.length || 0)} PRs</span>
+<span>{(project.issues?.length || 0)} Issues</span>
+
                       </div>
                     </div>
                   </li>
