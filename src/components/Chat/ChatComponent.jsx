@@ -11,7 +11,7 @@ const ChatComponent = ({ currentUser, selectedUser }) => {
 
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io('http://localhost:5001');
+      socketRef.current = io('http://localhost:5000');
       socketRef.current.emit('register', currentUser.email);
     }
 

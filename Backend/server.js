@@ -266,10 +266,7 @@ app.post('/api/workspaces/:workspaceName/channels/:channelId/messages', async (r
 });
 
 // Update your server.listen to use the http server instead of app
-const port =  5001;
-server.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+
 app.use(cors());
 app.use(express.json());
 
@@ -1807,8 +1804,9 @@ io.on('sendMessage', async (data) => {
 });
 
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
 
+
+const port =  5000;
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});

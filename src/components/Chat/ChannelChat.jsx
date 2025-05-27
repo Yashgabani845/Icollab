@@ -18,7 +18,7 @@ const ChannelChat = ({ channel, wname }) => {
 
   // Connect to socket when component mounts
   useEffect(() => {
-    socketRef.current = io("http://localhost:5001")
+    socketRef.current = io("http://localhost:5000")
 
     // Join the channel room
     if (channel && wname) {

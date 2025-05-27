@@ -73,7 +73,7 @@ const VideoChat = () => {
 
     // Initialize Socket Connection
     useEffect(() => {
-        const socket = io('http://localhost:5001', { 
+        const socket = io('http://localhost:5000', { 
             transports: ['websocket'],
             forceNew: true 
         });
