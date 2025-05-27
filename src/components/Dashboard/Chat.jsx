@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import axios from "axios";
 
-const socket = io("http://localhost:5000"); // Adjust based on your server
+const socket = io("https://icollab.onrender.com"); // Adjust based on your server
 
 const Chat = ({ channelId, user }) => {
   const [messages, setMessages] = useState([]);

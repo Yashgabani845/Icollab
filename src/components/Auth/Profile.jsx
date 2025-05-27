@@ -18,7 +18,7 @@ const Profile = () => {
           return;
         }
 
-        const response = await fetch(`http://localhost:5000/api/profile?email=${userEmail}`);
+        const response = await fetch(`https://icollab.onrender.com/api/profile?email=${userEmail}`);
         if (!response.ok) {
           throw new Error("Failed to fetch profile data");
         }

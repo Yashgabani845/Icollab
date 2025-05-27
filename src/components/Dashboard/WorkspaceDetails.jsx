@@ -19,7 +19,7 @@ const WorkspaceDetail = () => {
       try {
         const userId = localStorage.getItem("email");
 
-        const res = await axios.get(`http://localhost:5000/api/workspaces/${workspaceName}`, {
+        const res = await axios.get(`https://icollab.onrender.com/api/workspaces/${workspaceName}`, {
           params: { userId },
         });
         setWorkspace(res.data);

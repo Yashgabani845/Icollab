@@ -11,7 +11,7 @@ const CreateChannel = ({ workspaceName, closeModal }) => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/workspaces/${workspaceName}/members`);
+        const res = await axios.get(`https://icollab.onrender.com/api/workspaces/${workspaceName}/members`);
         setUsers(res.data);
       } catch (err) {
         console.error("Error fetching users:", err);
@@ -28,7 +28,7 @@ const CreateChannel = ({ workspaceName, closeModal }) => {
     }
 
     try {
-      await axios.post(`http://localhost:5000/api/workspaces/${workspaceName}/channels`, {
+      await axios.post(`https://icollab.onrender.com/api/workspaces/${workspaceName}/channels`, {
         name: newChannel.name,
         description: newChannel.description,
         members: selectedMembers.map(member => member.value),

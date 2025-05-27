@@ -14,7 +14,7 @@ const LoginPage = () => {
       const user = result.user;
       
       // Verify with your backend
-      const response = await fetch('http://localhost:5000/api/google-login', {
+      const response = await fetch('https://icollab.onrender.com/api/google-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ const LoginPage = () => {
 const navigate = useNavigate();
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
+      const response = await fetch("https://icollab.onrender.com/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -17,7 +17,7 @@ const ProjectManager = () => {
     const fetchProjects = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/workspaces/${workspaceId}/projects`);
+        const response = await fetch(`https://icollab.onrender.com/api/workspaces/${workspaceId}/projects`);
         const data = await response.json();
     
         const safeData = data.map((project) => ({
@@ -37,7 +37,7 @@ const ProjectManager = () => {
 
     const fetchUsers = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/workspaces/${workspaceId}/users`);
+        const response = await fetch(`https://icollab.onrender.com/api/workspaces/${workspaceId}/users`);
         const data = await response.json();
         setUsers(data);
       } catch (err) {
@@ -62,7 +62,7 @@ const ProjectManager = () => {
       setLoading(true);
       setError(null);
         console.log(repoUrl,workspaceId,localStorage.getItem('email'));
-      const response = await fetch('http://localhost:5000/api/projects', {
+      const response = await fetch('https://icollab.onrender.com/api/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ const ProjectManager = () => {
   // Assign PR or issue to a user
   const handleAssignItem = async (projectId, itemType, itemId, userId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/projects/${projectId}/${itemType}/${itemId}/assign`, {
+      const response = await fetch(`https://icollab.onrender.com/api/projects/${projectId}/${itemType}/${itemId}/assign`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

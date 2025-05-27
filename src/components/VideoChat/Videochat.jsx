@@ -73,7 +73,7 @@ const VideoChat = () => {
 
     // Initialize Socket Connection
     useEffect(() => {
-        const socket = io('http://localhost:5000', { 
+        const socket = io('https://icollab.onrender.com', { 
             transports: ['websocket'],
             forceNew: true 
         });

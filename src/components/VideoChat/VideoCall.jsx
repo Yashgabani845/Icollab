@@ -32,7 +32,7 @@ const VideoCall = () => {
   };
 
   useEffect(() => {
-    socketRef.current = io('http://localhost:5000', {
+    socketRef.current = io('https://icollab.onrender.com', {
       transports: ['websocket'],
       forceNew: true
     });

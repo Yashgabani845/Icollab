@@ -3,7 +3,7 @@
 import axios from "axios";
 
 class ChatSummarizerService {
-  constructor(baseUrl = "http://localhost:5000") {
+  constructor(baseUrl = "https://icollab.onrender.com") {
     this.baseUrl = baseUrl;
   }
 

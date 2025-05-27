@@ -35,7 +35,7 @@ const Task = ({ taskId, title, description, taskListId, onArchive, onMove, fetch
             setIsLoading(true);
     
             // Fetch the task details
-            const response = await fetch(`http://localhost:5000/api/task/${taskId}`);
+            const response = await fetch(`https://icollab.onrender.com/api/task/${taskId}`);
             if (!response.ok) {
                 throw new Error(`Failed to fetch task: ${response.statusText}`);
             }
@@ -59,7 +59,7 @@ const Task = ({ taskId, title, description, taskListId, onArchive, onMove, fetch
             }
     
             // Fetch the task list details
-            const taskListResponse = await fetch(`http://localhost:5000/api/tasklist/${taskListId}`);
+            const taskListResponse = await fetch(`https://icollab.onrender.com/api/tasklist/${taskListId}`);
             if (!taskListResponse.ok) {
                 throw new Error(`Failed to fetch task list: ${taskListResponse.statusText}`);
             }
@@ -76,7 +76,7 @@ const Task = ({ taskId, title, description, taskListId, onArchive, onMove, fetch
 
     const fetchTaskLists = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/tasklists?userEmail=${localStorage.email}`);
+            const response = await fetch(`https://icollab.onrender.com/api/tasklists?userEmail=${localStorage.email}`);
             setTaskLists(response.data);
         } catch (error) {
             console.error("Error fetching task lists:", error);
@@ -96,7 +96,7 @@ const Task = ({ taskId, title, description, taskListId, onArchive, onMove, fetch
         if (!newComment.trim()) return;
 
         try {
-            await fetch(`http://localhost:5000/api/tasks/${taskId}/comments`, {
+            await fetch(`https://icollab.onrender.com/api/tasks/${taskId}/comments`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text: newComment , user: localStorage.email })
@@ -109,7 +109,7 @@ const Task = ({ taskId, title, description, taskListId, onArchive, onMove, fetch
     };
     const handleUpdateDescription = async () => {
       try {
-          await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+          await fetch(`https://icollab.onrender.com/api/tasks/${taskId}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ description: taskDescription })
@@ -124,7 +124,7 @@ const Task = ({ taskId, title, description, taskListId, onArchive, onMove, fetch
     if (!newChecklistItem.trim()) return;
 
     try {
-        await fetch(`http://localhost:5000/api/tasks/${taskId}/checklist`, {
+        await fetch(`https://icollab.onrender.com/api/tasks/${taskId}/checklist`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ title: newChecklistItem , user: localStorage.email })
@@ -137,7 +137,7 @@ const Task = ({ taskId, title, description, taskListId, onArchive, onMove, fetch
 };
 const handleToggleChecklistItem = async (itemId, currentStatus) => {
   try {
-      await fetch(`http://localhost:5000/api/tasks/${taskId}/checklist/${itemId}`, {
+      await fetch(`https://icollab.onrender.com/api/tasks/${taskId}/checklist/${itemId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: !currentStatus })
@@ -149,7 +149,7 @@ const handleToggleChecklistItem = async (itemId, currentStatus) => {
 };
 const handleDeleteChecklistItem = async (itemId) => {
   try {
-      await fetch(`http://localhost:5000/api/tasks/${taskId}/checklist/${itemId}`, { method: "DELETE" });
+      await fetch(`https://icollab.onrender.com/api/tasks/${taskId}/checklist/${itemId}`, { method: "DELETE" });
       fetchTaskData();
   } catch (error) {
       console.error("Error deleting checklist item:", error);
@@ -158,7 +158,7 @@ const handleDeleteChecklistItem = async (itemId) => {
   if (!newLabel.trim()) return;
 
   try {
-      await fetch(`http://localhost:5000/api/tasks/${taskId}/labels`, {
+      await fetch(`https://icollab.onrender.com/api/tasks/${taskId}/labels`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ label: newLabel })
@@ -172,7 +172,7 @@ const handleDeleteChecklistItem = async (itemId) => {
 
 const handleRemoveLabel = async (label) => {
   try {
-      await fetch(`http://localhost:5000/api/tasks/${taskId}/labels/${encodeURIComponent(label)}`, { method: "DELETE" });
+      await fetch(`https://icollab.onrender.com/api/tasks/${taskId}/labels/${encodeURIComponent(label)}`, { method: "DELETE" });
       fetchTaskData();
   } catch (error) {
       console.error("Error removing label:", error);
@@ -181,7 +181,7 @@ const handleRemoveLabel = async (label) => {
 
 const handleSetDueDate = async (date) => {
     try {
-        const response = await fetch(`http://localhost:5000/api/tasks/${taskId}/deadline`, {
+        const response = await fetch(`https://icollab.onrender.com/api/tasks/${taskId}/deadline`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -207,7 +207,7 @@ const handleSetDueDate = async (date) => {
 
 const handleMoveTask = async (newTaskListId) => {
     try {
-        await fetch(`http://localhost:5000/api/tasks/${taskId}/move`, {
+        await fetch(`https://icollab.onrender.com/api/tasks/${taskId}/move`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ newTaskListId })

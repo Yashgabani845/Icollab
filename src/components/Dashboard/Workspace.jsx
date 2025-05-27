@@ -20,7 +20,7 @@ const Workspace = () => {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/workspaces?userEmail=${userEmail}`
+          `https://icollab.onrender.com/api/workspaces?userEmail=${userEmail}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch workspaces");

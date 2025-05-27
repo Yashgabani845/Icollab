@@ -23,7 +23,7 @@ const Taskboard = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/tasklists?userEmail=${localStorage.email}`);
+      const response = await fetch(`https://icollab.onrender.com/api/tasklists?userEmail=${localStorage.email}`);
       if (!response.ok) {
         throw new Error('Failed to fetch task lists');
       }
@@ -49,7 +49,7 @@ const Taskboard = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/tasklists', {
+      const response = await fetch('https://icollab.onrender.com/api/tasklists', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

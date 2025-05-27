@@ -23,7 +23,7 @@ const navigate = useNavigate();
       const user = result.user;
       
       // Send user data to your backend
-      const response = await fetch('http://localhost:5000/api/google-signup', {
+      const response = await fetch('https://icollab.onrender.com/api/google-signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ const navigate = useNavigate();
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/signup", {
+      const response = await fetch("https://icollab.onrender.com/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

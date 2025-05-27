@@ -18,7 +18,7 @@ const ChannelChat = ({ channel, wname }) => {
 
   // Connect to socket when component mounts
   useEffect(() => {
-    socketRef.current = io("http://localhost:5000")
+    socketRef.current = io("https://icollab.onrender.com")
 
     // Join the channel room
     if (channel && wname) {
@@ -70,7 +70,7 @@ const ChannelChat = ({ channel, wname }) => {
 
   const fetchMessages = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/workspaces/${wname}/channels/${channel._id}/messages`)
+      const res = await axios.get(`https://icollab.onrender.com/api/workspaces/${wname}/channels/${channel._id}/messages`)
       setMessages(res.data)
     } catch (error) {
       console.error("Error fetching messages:", error)

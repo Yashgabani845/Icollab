@@ -11,7 +11,7 @@ const ChatComponent = ({ currentUser, selectedUser }) => {
 
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io('http://localhost:5000');
+      socketRef.current = io('https://icollab.onrender.com');
       socketRef.current.emit('register', currentUser.email);
     }
 
@@ -48,7 +48,7 @@ const ChatComponent = ({ currentUser, selectedUser }) => {
       
       try {
         const response = await fetch(
-          `http://localhost:5000/api/messages/${currentUser.email}?with=${selectedUser.email}&limit=50`
+          `https://icollab.onrender.com/api/messages/${currentUser.email}?with=${selectedUser.email}&limit=50`
         );
 
         if (!response.ok) {
