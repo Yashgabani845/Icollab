@@ -1,20 +1,41 @@
-# Icollab (collaboration platform)
+# 🤝 Icollab - Collaborative Tool for Modern Teams
 
-Icollab is a real-time team collaboration platform that streamlines communication, improves productivity, and enhances organizational workflows. It features channels for communication, messaging, video calls, and app integrations, designed for teams to stay organized and connected.
+**Icollab** is a full-featured MERN stack web application designed to streamline team communication, enhance productivity, and simplify project coordination. It provides a centralized platform for messaging, task management, and video conferencing, complete with AI-powered chat summarization.
 
-## Features:
-- **Channels**: Create public and private channels for team discussions.
-- **Messaging**: Send and receive real-time messages within channels and direct messages.
-- **App Integrations**: Integrate with third-party apps like GitHub and email.
-- **Message Summarization**: Use machine learning to summarize messages for better readability.
-- **Video Calling**: Initiate video calls with teammates in real-time.
-- **Multi-Workspace Support**: Manage multiple workspaces for different teams or projects.
-- **Web Accessibility**: The app is designed to be fully accessible across web browsers.
+## 🚀 Features
 
-## Tech Stack:
-- **Frontend**: React.js, Redux (for state management), CSS/SCSS
-- **Backend**: Node.js, Express.js, WebSockets (for real-time communication)
-- **Database**: MongoDB
-- **Video Calling**: WebRTC
-- **Authentication**: JWT (JSON Web Tokens)
-- **Machine Learning**: For message summarization
+- 🔐 Authentication using JWT + Google OAuth
+- 💬 Real-time messaging with Socket.IO
+- 🎥 Video calling & screen sharing with WebRTC
+- 📝 AI-powered chat summarization
+- 🗂️ Multi-workspace and multi-channel structure
+- 🔄 Persistent login using localStorage
+
+## 🛠️ Tech Stack
+
+- **React.js**
+- **Node.js**
+- **Express.js**
+- **MongoDB**
+- **Socket.IO** – Real-time chat
+- **WebRTC** – Video calling
+
+## 📸 Screenshots
+
+![Icollab](screenshots/1.png)
+
+![Icollab](screenshots/2.png)
+
+![Icollab](screenshots/3.png)
+
+![Icollab](screenshots/4.png)
+
+![Icollab](screenshots/5.png)
+
+![Icollab](screenshots/6.png)
+
+![Icollab](screenshots/7.png)
+
+![Icollab](screenshots/8.png)
+
+![Icollab](screenshots/9.png)
