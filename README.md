@@ -17,6 +17,9 @@
 - **Node.js**
 - **Express.js**
 - **MongoDB**
+- **Mongoose**
+- **JWT (JSON Web Tokens)** – User authentication
+- **bcrypt** – Password hashing
 - **Socket.IO** – Real-time chat
 - **WebRTC** – Video calling
 
