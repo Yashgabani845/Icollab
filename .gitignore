@@ -7,7 +7,7 @@
 /final_chat_summary_model
 # testing
 /coverage
-
+.env
 # production
 /build
 

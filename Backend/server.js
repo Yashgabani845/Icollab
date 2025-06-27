@@ -11,7 +11,6 @@ const { Server } = require('socket.io');
 
 const User = require("./models/User")
 const TaskList = require('./models/TaskList');
-// const { Server } = require('socket.io');
 const http = require('http');
 const Message = require('./models/Message');
 const nodemailer = require('nodemailer');
@@ -19,6 +18,8 @@ const Task = require('./models/Task');
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+require('dotenv').config();
+
 
 const URI = process.env.MONGO_URI || 'mongodb+srv://YashGabani:Yash9182@cluster0.n77u6.mongodb.net/Icollab?retryWrites=true&w=majority&appName=Cluster0';
 
@@ -1070,33 +1071,48 @@ app.post("/api/channels", async (req, res) => {
 //     }
 //   });
 // });
+const axios = require('axios');
 
 app.post('/api/projects', async (req, res) => {
   try {
-    const { repositoryUrl ,workspaceId,addedBy} = req.body;
-    console.log(repositoryUrl ,workspaceId,addedBy)
-        // Validate URL format
+    const { repositoryUrl, workspaceId, addedBy } = req.body;
+    console.log(repositoryUrl, workspaceId, addedBy);
+
+    // Validate URL format
     if (!repositoryUrl.match(/^https:\/\/github\.com\/[^/]+\/[^/]+$/)) {
       return res.status(400).json({ message: 'Invalid GitHub repository URL' });
     }
-    
+
     // Extract owner and repo name from URL
     const urlParts = repositoryUrl.split('/');
     const owner = urlParts[urlParts.length - 2];
     const repoName = urlParts[urlParts.length - 1];
-    
+
     // Check if project already exists
     const existingProject = await Project.findOne({ repositoryUrl });
     if (existingProject) {
       return res.status(400).json({ message: 'Project already exists' });
     }
-    
+
+    // Use your GitHub token directly here (replace with your actual token if you wish)
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    const headers = {
+      Authorization: `token ${GITHUB_TOKEN}`,
+      'User-Agent': 'icollab-app' // GitHub requires a User-Agent header
+    };
+
     // Fetch repository data from GitHub API
-    const repoResponse = await axios.get(`https://api.github.com/repos/${owner}/${repoName}`);
+    const repoResponse = await axios.get(
+      `https://api.github.com/repos/${owner}/${repoName}`,
+      { headers }
+    );
     const repoData = repoResponse.data;
-    
+
     // Fetch pull requests
-    const prResponse = await axios.get(`https://api.github.com/repos/${owner}/${repoName}/pulls?state=all&per_page=100`);
+    const prResponse = await axios.get(
+      `https://api.github.com/repos/${owner}/${repoName}/pulls?state=all&per_page=100`,
+      { headers }
+    );
     const pullRequests = prResponse.data.map(pr => ({
       id: pr.id,
       title: pr.title,
@@ -1106,9 +1122,12 @@ app.post('/api/projects', async (req, res) => {
       updatedAt: pr.updated_at,
       repository: repositoryUrl
     }));
-    
+
     // Fetch issues
-    const issueResponse = await axios.get(`https://api.github.com/repos/${owner}/${repoName}/issues?state=all&per_page=100`);
+    const issueResponse = await axios.get(
+      `https://api.github.com/repos/${owner}/${repoName}/issues?state=all&per_page=100`,
+      { headers }
+    );
     const issues = issueResponse.data
       .filter(issue => !issue.pull_request) // Filter out pull requests that appear in issues list
       .map(issue => ({
@@ -1120,8 +1139,10 @@ app.post('/api/projects', async (req, res) => {
         updatedAt: issue.updated_at,
         repository: repositoryUrl
       }));
+
     const usera = await User.findOne({ email: addedBy });
-    console.log("User", usera)
+    console.log('User', usera);
+
     // Create new project
     const newProject = new Project({
       repositoryUrl,
@@ -1132,16 +1153,16 @@ app.post('/api/projects', async (req, res) => {
       forks: repoData.forks_count,
       pullRequests,
       issues,
-      workspace:workspaceId ,
-      addedBy: usera._id ,
+      workspace: workspaceId,
+      addedBy: usera._id,
       lastSynced: new Date()
     });
-    
+
     await newProject.save();
-    
+
     res.status(201).json(newProject);
   } catch (error) {
-    console.error('Error adding project:', error);
+    console.error('Error adding project:', error.response ? error.response.data : error.message);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
