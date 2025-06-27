@@ -17,15 +17,15 @@ const ProjectManager = () => {
     const fetchProjects = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://icollab.onrender.com/api/workspaces/${workspaceId}/projects`);
+        const response = await fetch(`http://localhost:5000/api/workspaces/${workspaceId}/projects`);
         const data = await response.json();
-    
+
         const safeData = data.map((project) => ({
           ...project,
-          pullRequests: project.pullRequests || [],
-          issues: project.issues || [],
+          pullRequests: Array.isArray(project.pullRequests) ? project.pullRequests : [],
+          issues: Array.isArray(project.issues) ? project.issues : [],
         }));
-    
+
         setProjects(safeData);
         setLoading(false);
       } catch (err) {
@@ -33,7 +33,6 @@ const ProjectManager = () => {
         setLoading(false);
       }
     };
-    
 
     const fetchUsers = async () => {
       try {
@@ -61,8 +60,7 @@ const ProjectManager = () => {
     try {
       setLoading(true);
       setError(null);
-        console.log(repoUrl,workspaceId,localStorage.getItem('email'));
-      const response = await fetch('https://icollab.onrender.com/api/projects', {
+      const response = await fetch('http://localhost:5000/api/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,9 +72,30 @@ const ProjectManager = () => {
         }),
       });
       const data = await response.json();
-      setProjects([...projects, data]);
       setRepoUrl('');
       setLoading(false);
+      // Refetch projects to get the freshest state
+      // (do not just append, as it may not have the correct structure)
+      // You could also optimistically append after validating structure
+      // For now, safest is to refetch:
+      const fetchProjects = async () => {
+        try {
+          setLoading(true);
+          const response = await fetch(`http://localhost:5000/api/workspaces/${workspaceId}/projects`);
+          const data = await response.json();
+          const safeData = data.map((project) => ({
+            ...project,
+            pullRequests: Array.isArray(project.pullRequests) ? project.pullRequests : [],
+            issues: Array.isArray(project.issues) ? project.issues : [],
+          }));
+          setProjects(safeData);
+          setLoading(false);
+        } catch (err) {
+          setError('No projects');
+          setLoading(false);
+        }
+      };
+      fetchProjects();
     } catch (err) {
       setError(err.message || 'Failed to add project');
       setLoading(false);
@@ -103,7 +122,7 @@ const ProjectManager = () => {
               itemType === 'pullrequest' ? updatedProject.pullRequests : updatedProject.issues;
 
             const updatedItems = items.map((item) => {
-              if (item._id === itemId) {
+              if (item.id === itemId) { // Changed from _id to id
                 return { ...item, assignee: userId };
               }
               return item;
@@ -200,9 +219,8 @@ const ProjectManager = () => {
                     <div className="project-info">
                       <div className="project-name">{project.name}</div>
                       <div className="project-meta">
-                      <span>{(project.pullRequests?.length || 0)} PRs</span>
-<span>{(project.issues?.length || 0)} Issues</span>
-
+                        <span>{project.pullRequests?.length || 0} PRs</span>
+                        <span>{project.issues?.length || 0} Issues</span>
                       </div>
                     </div>
                   </li>
@@ -224,7 +242,7 @@ const ProjectManager = () => {
                       <span className="emoji">🍴</span> {selectedProject.forks}
                     </div>
                     <div className="stat">
-                      <span className="emoji">🔄</span> {new Date(selectedProject.lastSynced).toLocaleDateString()}
+                      <span className="emoji">🔄</span> {selectedProject.lastSynced ? new Date(selectedProject.lastSynced).toLocaleDateString() : ''}
                     </div>
                   </div>
                 </div>
@@ -234,22 +252,22 @@ const ProjectManager = () => {
                     className={`tab ${activeTab === 'pullRequests' ? 'active' : ''}`}
                     onClick={() => setActiveTab('pullRequests')}
                   >
-                    Pull Requests ({selectedProject.pullRequests.length})
+                    Pull Requests ({selectedProject?.pullRequests?.length || 0})
                   </button>
                   <button
                     className={`tab ${activeTab === 'issues' ? 'active' : ''}`}
                     onClick={() => setActiveTab('issues')}
                   >
-                    Issues ({selectedProject.issues.length})
+                    Issues ({selectedProject?.issues?.length || 0})
                   </button>
                 </div>
 
                 <div className="items-container">
                   {activeTab === 'pullRequests' && (
-                    selectedProject.pullRequests.length > 0 ? (
+                    (selectedProject?.pullRequests?.length > 0) ? (
                       <div className="items-list">
-                        {selectedProject.pullRequests.map((pr) => (
-                          <div key={pr._id} className={`item-card pr-${pr.state}`}>
+                        {(selectedProject.pullRequests || []).map((pr) => (
+                          <div key={pr.id} className={`item-card pr-${pr.state}`}>
                             <div className="item-header">
                               <span className="emoji pr-icon">
                                 {pr.state === 'open' ? '🟢' : pr.state === 'merged' ? '🟣' : '🔴'}
@@ -269,7 +287,7 @@ const ProjectManager = () => {
                                     handleAssignItem(
                                       selectedProject._id,
                                       'pullrequest',
-                                      pr._id,
+                                      pr.id,
                                       e.target.value || null
                                     )
                                   }
@@ -295,10 +313,10 @@ const ProjectManager = () => {
                   )}
 
                   {activeTab === 'issues' && (
-                    selectedProject.issues.length > 0 ? (
+                    (selectedProject?.issues?.length > 0) ? (
                       <div className="items-list">
-                        {selectedProject.issues.map((issue) => (
-                          <div key={issue._id} className={`item-card issue-${issue.state}`}>
+                        {(selectedProject.issues || []).map((issue) => (
+                          <div key={issue.id} className={`item-card issue-${issue.state}`}>
                             <div className="item-header">
                               <span className="emoji issue-icon">
                                 {issue.state === 'open' ? '🟢' : '🔴'}
@@ -318,7 +336,7 @@ const ProjectManager = () => {
                                     handleAssignItem(
                                       selectedProject._id,
                                       'issue',
-                                      issue._id,
+                                      issue.id,
                                       e.target.value || null
                                     )
                                   }
