@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import { FaPhone, FaPhoneSlash, FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash } from 'react-icons/fa';
-
 import "../../CSS/videocall.css";
 
 const VideoCall = () => {
@@ -18,6 +17,9 @@ const VideoCall = () => {
   const peerConnectionRef = useRef(null);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+
+  // Queue for ICE candidates received before remoteDescription is set
+  const pendingCandidatesRef = useRef([]);
 
   const iceServers = {
     iceServers: [
@@ -38,9 +40,11 @@ const VideoCall = () => {
     });
 
     socketRef.current.on('connect', () => {
-      console.log('Connected with ID:', socketRef.current.id);
-      const userEmail = localStorage.email;
+      // Try to use email from localStorage as the userId
+      const userEmail = localStorage.email || '';
+      setUserId(userEmail);
       socketRef.current.emit('register-email', userEmail);
+      console.log('Connected with ID:', socketRef.current.id);
     });
 
     socketRef.current.on('incoming-call', async ({ from, offer }) => {
@@ -48,12 +52,20 @@ const VideoCall = () => {
       setIncomingCall({ from, offer });
       setCurrentCallId(from);
     });
-    
 
     socketRef.current.on('call-accepted', async (answer) => {
       console.log('Call accepted, setting remote description');
       try {
         await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer));
+        // Add any queued ICE candidates
+        for (const candidate of pendingCandidatesRef.current) {
+          try {
+            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+          } catch (e) {
+            console.error('Error adding pending ICE candidate:', e);
+          }
+        }
+        pendingCandidatesRef.current = [];
       } catch (error) {
         console.error('Error setting remote description:', error);
       }
@@ -62,8 +74,12 @@ const VideoCall = () => {
     socketRef.current.on('candidate', async (candidate) => {
       console.log('Received ICE candidate');
       try {
-        if (peerConnectionRef.current && peerConnectionRef.current.remoteDescription) {
-          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+        if (peerConnectionRef.current) {
+          if (peerConnectionRef.current.remoteDescription && peerConnectionRef.current.remoteDescription.type) {
+            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+          } else {
+            pendingCandidatesRef.current.push(candidate);
+          }
         }
       } catch (error) {
         console.error('Error adding ICE candidate:', error);
@@ -78,6 +94,7 @@ const VideoCall = () => {
       cleanupCall();
       socketRef.current?.disconnect();
     };
+    // eslint-disable-next-line
   }, []);
 
   const createPeerConnection = () => {
@@ -107,6 +124,10 @@ const VideoCall = () => {
 
     pc.oniceconnectionstatechange = () => {
       console.log('ICE Connection State:', pc.iceConnectionState);
+      // Optional: handle call cleanup on 'failed' or 'disconnected'
+      if (['failed', 'disconnected', 'closed'].includes(pc.iceConnectionState)) {
+        cleanupCall();
+      }
     };
 
     return pc;
@@ -126,6 +147,7 @@ const VideoCall = () => {
     } catch (error) {
       console.error('Error accessing media devices:', error);
       alert('Cannot access camera or microphone');
+      throw error;
     }
   };
 
@@ -138,7 +160,7 @@ const VideoCall = () => {
     try {
       setCurrentCallId(targetUserId);
       setIsInCall(true);
-      
+
       const stream = await startLocalStream();
       const pc = createPeerConnection();
 
@@ -154,7 +176,7 @@ const VideoCall = () => {
 
       console.log('Sending call offer to:', targetUserId);
       socketRef.current.emit('initiate-call', {
-        toEmail: targetUserId, 
+        toEmail: targetUserId,
         offer: pc.localDescription
       });
     } catch (error) {
@@ -176,6 +198,15 @@ const VideoCall = () => {
       });
 
       await pc.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
+      // Add any queued ICE candidates after remote description is set
+      for (const candidate of pendingCandidatesRef.current) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (e) {
+          console.error('Error adding pending ICE candidate:', e);
+        }
+      }
+      pendingCandidatesRef.current = [];
 
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
@@ -198,7 +229,11 @@ const VideoCall = () => {
       localStream.getTracks().forEach(track => track.stop());
     }
     if (peerConnectionRef.current) {
+      peerConnectionRef.current.onicecandidate = null;
+      peerConnectionRef.current.ontrack = null;
+      peerConnectionRef.current.oniceconnectionstatechange = null;
       peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
     }
     setLocalStream(null);
     setIsInCall(false);
@@ -208,6 +243,7 @@ const VideoCall = () => {
     setIsVideoOff(false);
     if (localVideoRef.current) localVideoRef.current.srcObject = null;
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+    pendingCandidatesRef.current = [];
   };
 
   const endCall = () => {
@@ -237,14 +273,13 @@ const VideoCall = () => {
     <div className="video-call-container">
       <h2 className="user-id">Your ID: {userId}</h2>
       <div className="call-controls">
-      <input
-  type="text"
-  value={targetUserId}
-  onChange={(e) => setTargetUserId(e.target.value)}
-  placeholder="Enter email ID to call"
-  className="input-field"
-/>
-
+        <input
+          type="text"
+          value={targetUserId}
+          onChange={(e) => setTargetUserId(e.target.value)}
+          placeholder="Enter email ID to call"
+          className="input-field"
+        />
         <button
           onClick={initiateCall}
           disabled={isInCall}

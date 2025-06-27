@@ -1076,10 +1076,17 @@ app.post("/api/channels", async (req, res) => {
 app.post('/api/projects', async (req, res) => {
   try {
     const { repositoryUrl, workspaceId, addedBy } = req.body;
-    console.log(repositoryUrl, workspaceId, addedBy);
+    console.log('Received:', { repositoryUrl, workspaceId, addedBy });
+
+    // Check for missing fields
+    if (!repositoryUrl || !workspaceId || !addedBy) {
+      console.warn('Missing required fields');
+      return res.status(400).json({ message: 'repositoryUrl, workspaceId, and addedBy are required' });
+    }
 
     // Validate URL format
-    if (!repositoryUrl.match(/^https:\/\/github\.com\/[^/]+\/[^/]+$/)) {
+    if (!/^https:\/\/github\.com\/[^/]+\/[^/]+$/.test(repositoryUrl)) {
+      console.warn('Invalid GitHub repository URL:', repositoryUrl);
       return res.status(400).json({ message: 'Invalid GitHub repository URL' });
     }
 
@@ -1091,6 +1098,7 @@ app.post('/api/projects', async (req, res) => {
     // Check if project already exists
     const existingProject = await Project.findOne({ repositoryUrl });
     if (existingProject) {
+      console.warn('Project already exists:', repositoryUrl);
       return res.status(400).json({ message: 'Project already exists' });
     }
 
@@ -1102,49 +1110,67 @@ app.post('/api/projects', async (req, res) => {
     };
 
     // Fetch repository data from GitHub API
-    const repoResponse = await axios.get(
-      `https://api.github.com/repos/${owner}/${repoName}`,
-      { headers }
-    );
-    const repoData = repoResponse.data;
+    let repoData;
+    try {
+      const repoResponse = await axios.get(
+        `https://api.github.com/repos/${owner}/${repoName}`,
+        { headers }
+      );
+      repoData = repoResponse.data;
+    } catch (apiErr) {
+      console.error('GitHub repo fetch error:', apiErr.response ? apiErr.response.data : apiErr.message);
+      return res.status(400).json({ message: 'GitHub repository not found or inaccessible' });
+    }
 
     // Fetch pull requests
-    const prResponse = await axios.get(
-      `https://api.github.com/repos/${owner}/${repoName}/pulls?state=all&per_page=100`,
-      { headers }
-    );
-    const pullRequests = prResponse.data.map(pr => ({
-      id: pr.id,
-      title: pr.title,
-      url: pr.html_url,
-      state: pr.state === 'closed' && pr.merged_at ? 'merged' : pr.state,
-      createdAt: pr.created_at,
-      updatedAt: pr.updated_at,
-      repository: repositoryUrl
-    }));
-
-    // Fetch issues
-    const issueResponse = await axios.get(
-      `https://api.github.com/repos/${owner}/${repoName}/issues?state=all&per_page=100`,
-      { headers }
-    );
-    const issues = issueResponse.data
-      .filter(issue => !issue.pull_request)
-      .map(issue => ({
-        id: issue.id,
-        title: issue.title,
-        url: issue.html_url,
-        state: issue.state,
-        createdAt: issue.created_at,
-        updatedAt: issue.updated_at,
+    let pullRequests = [];
+    try {
+      const prResponse = await axios.get(
+        `https://api.github.com/repos/${owner}/${repoName}/pulls?state=all&per_page=100`,
+        { headers }
+      );
+      pullRequests = prResponse.data.map(pr => ({
+        id: pr.id,
+        title: pr.title,
+        url: pr.html_url,
+        state: pr.state === 'closed' && pr.merged_at ? 'merged' : pr.state,
+        createdAt: pr.created_at,
+        updatedAt: pr.updated_at,
         repository: repositoryUrl
       }));
+    } catch (prErr) {
+      console.warn('Could not fetch pull requests:', prErr.message);
+    }
 
+    // Fetch issues
+    let issues = [];
+    try {
+      const issueResponse = await axios.get(
+        `https://api.github.com/repos/${owner}/${repoName}/issues?state=all&per_page=100`,
+        { headers }
+      );
+      issues = issueResponse.data
+        .filter(issue => !issue.pull_request)
+        .map(issue => ({
+          id: issue.id,
+          title: issue.title,
+          url: issue.html_url,
+          state: issue.state,
+          createdAt: issue.created_at,
+          updatedAt: issue.updated_at,
+          repository: repositoryUrl
+        }));
+    } catch (issueErr) {
+      console.warn('Could not fetch issues:', issueErr.message);
+    }
+
+    // Check user existence
     const usera = await User.findOne({ email: addedBy });
     if (!usera) {
+      console.warn('User not found:', addedBy);
       return res.status(400).json({ message: 'User not found' });
     }
-    console.log('User', usera);
+    console.log('User:', usera.email);
 
     // Create new project
     const newProject = new Project({
@@ -1169,7 +1195,6 @@ app.post('/api/projects', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
-
 // Get all projects for a workspace
 app.get('/api/workspaces/:workspaceId/projects', async (req, res) => {
   try {

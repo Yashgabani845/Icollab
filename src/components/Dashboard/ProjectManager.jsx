@@ -49,58 +49,68 @@ const ProjectManager = () => {
   }, [workspaceId]);
 
   // Add a new project
-  const handleAddProject = async (e) => {
-    e.preventDefault();
+  // ...rest of your code
 
-    if (!repoUrl.trim()) {
-      setError('Please enter a GitHub repository URL');
+const handleAddProject = async (e) => {
+  e.preventDefault();
+
+  if (!repoUrl.trim()) {
+    setError('Please enter a GitHub repository URL');
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setError(null);5000
+    const response = await fetch('https://icollab.onrender.com/api/projects', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        repositoryUrl: repoUrl,
+        workspaceId,
+        addedBy: localStorage.getItem('email'),
+      }),
+    });
+
+    // Always parse the response as JSON
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Show the actual backend error message in the UI
+      setError(data.message || 'Failed to add project');
+      setLoading(false);
       return;
     }
 
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await fetch('https://icollab.onrender.com/api/projects', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          repositoryUrl: repoUrl,
-          workspaceId,
-          addedBy: localStorage.getItem('email'),
-        }),
-      });
-      const data = await response.json();
-      setRepoUrl('');
-      setLoading(false);
-      // Refetch projects to get the freshest state
-      // (do not just append, as it may not have the correct structure)
-      // You could also optimistically append after validating structure
-      // For now, safest is to refetch:
-      const fetchProjects = async () => {
-        try {
-          setLoading(true);
-          const response = await fetch(`https://icollab.onrender.com/api/workspaces/${workspaceId}/projects`);
-          const data = await response.json();
-          const safeData = data.map((project) => ({
-            ...project,
-            pullRequests: Array.isArray(project.pullRequests) ? project.pullRequests : [],
-            issues: Array.isArray(project.issues) ? project.issues : [],
-          }));
-          setProjects(safeData);
-          setLoading(false);
-        } catch (err) {
-          setError('No projects');
-          setLoading(false);
-        }
-      };
-      fetchProjects();
-    } catch (err) {
-      setError(err.message || 'Failed to add project');
-      setLoading(false);
-    }
-  };
+    setRepoUrl('');
+    setLoading(false);
+
+    // Refetch projects to get the freshest state
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`https://icollab.onrender.com/api/workspaces/${workspaceId}/projects`);
+        const data = await response.json();
+        const safeData = data.map((project) => ({
+          ...project,
+          pullRequests: Array.isArray(project.pullRequests) ? project.pullRequests : [],
+          issues: Array.isArray(project.issues) ? project.issues : [],
+        }));
+        setProjects(safeData);
+        setLoading(false);
+      } catch (err) {
+        setError('No projects');
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  } catch (err) {
+    setError(err.message || 'Failed to add project');
+    setLoading(false);
+  }
+};
 
   // Assign PR or issue to a user
   const handleAssignItem = async (projectId, itemType, itemId, userId) => {
