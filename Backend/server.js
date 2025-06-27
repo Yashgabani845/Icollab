@@ -39,149 +39,139 @@ connectDB();
 // Add this to your server.js or index.js file
 const socketIo = require('socket.io');
 const emailToSocketMap = new Map();
+const socketToEmailMap = new Map();
 
 const app = express();
 const server = http.createServer(app);
 app.use(cors({
-  origin: ['https://icollab-eta.vercel.app' , "http://localhost:3000"], // Your React app URL
+  origin: ['https://icollab-eta.vercel.app', "http://localhost:3000"], // Your React app URL
   credentials: true
 }));
 
-const io = new Server(server, {
+const io = new socketIo.Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
   }
 });
-// Socket.io connection handling
+
+// ----- Socket.io connection handling -----
 io.on('connection', (socket) => {
-  console.log('New client connected');
-  
-  // Join a specific channel room
+  console.log('User connected:', socket.id);
+
+  // --- Register Email for WebRTC Signaling ---
+  socket.on('register-email', (email) => {
+    emailToSocketMap.set(email, socket.id);
+    socketToEmailMap.set(socket.id, email);
+    console.log(`Registered email: ${email} with socket ID: ${socket.id}`);
+  });
+
+  // --- WebRTC: Initiate Call (by email) ---
+  socket.on('initiate-call', ({ toEmail, offer }) => {
+    const targetSocketId = emailToSocketMap.get(toEmail);
+    const fromEmail = socketToEmailMap.get(socket.id);
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('incoming-call', {
+        from: fromEmail, // send email, not socket.id
+        offer
+      });
+    } else {
+      socket.emit('user-not-found', { email: toEmail });
+    }
+  });
+
+  // --- WebRTC: Accept Call (by email) ---
+  socket.on('accept-call', ({ to, answer }) => {
+    const targetSocketId = emailToSocketMap.get(to); // "to" is email
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('call-accepted', answer);
+    }
+  });
+
+  // --- WebRTC: ICE Candidate (by email) ---
+  socket.on('candidate', ({ to, candidate }) => {
+    const targetSocketId = emailToSocketMap.get(to); // "to" is email
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('candidate', candidate);
+    }
+  });
+
+  // --- WebRTC: End Call (by email) ---
+  socket.on('end-call', ({ to }) => {
+    const targetSocketId = emailToSocketMap.get(to);
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('call-ended');
+    }
+  });
+
+  // --- Chat: Join/Leave Room ---
   socket.on('joinChannel', ({ channelId, workspaceName }) => {
     const roomName = `${workspaceName}-${channelId}`;
     socket.join(roomName);
     console.log(`User joined room: ${roomName}`);
   });
-  
-  // Leave a channel room
   socket.on('leaveChannel', ({ channelId, workspaceName }) => {
     const roomName = `${workspaceName}-${channelId}`;
     socket.leave(roomName);
     console.log(`User left room: ${roomName}`);
   });
-  
-  // Handle new messages
+
+  // --- Chat: Send Message ---
   socket.on('sendMessage', async ({ channelId, workspaceName, message }) => {
     try {
       const { senderId, content, senderName } = message;
       const roomName = `${workspaceName}-${channelId}`;
-      
-      // Find the workspace and channel
+
       const workspace = await Workspace.findOne({ name: workspaceName });
-      if (!workspace) {
-        return socket.emit('error', { message: "Workspace not found" });
-      }
-      
+      if (!workspace) return socket.emit('error', { message: "Workspace not found" });
+
       const channel = workspace.chat.channels.id(channelId);
-      if (!channel) {
-        return socket.emit('error', { message: "Channel not found" });
-      }
-      
-      // Find the user
+      if (!channel) return socket.emit('error', { message: "Channel not found" });
+
       const user = await User.findOne({ email: senderId });
-      if (!user) {
-        return socket.emit('error', { message: "User not found" });
-      }
-      
-      // Create and save the new message
+      if (!user) return socket.emit('error', { message: "User not found" });
+
       const newMessage = {
         sender: user._id,
         content,
         timestamp: new Date(),
       };
-      
       channel.messages.push(newMessage);
       await workspace.save();
-      
-      // Get the populated message to broadcast
+
       const updatedWorkspace = await Workspace.findOne({ name: workspaceName })
         .populate({
           path: 'chat.channels.messages.sender',
           select: 'name email _id'
         });
-      
       const updatedChannel = updatedWorkspace.chat.channels.id(channelId);
       const populatedMessage = updatedChannel.messages[updatedChannel.messages.length - 1];
-      
-      // Broadcast the message to everyone in the channel
       io.to(roomName).emit('newMessage', populatedMessage);
     } catch (error) {
       console.error("Error sending message via socket:", error);
       socket.emit('error', { message: "Failed to send message" });
     }
   });
-  
-  // Handle typing events
-  socket.on('typing', ({ channelId, workspaceName, userId, isTyping }) => {
-    console.log(`User Typing Event: ${userId} - Typing: ${isTyping}`);
 
+  // --- Chat: Typing Indicator ---
+  socket.on('typing', ({ channelId, workspaceName, userId, isTyping }) => {
     const roomName = `${workspaceName}-${channelId}`;
-    // Broadcast to everyone except the sender
     socket.to(roomName).emit('userTyping', { userId, isTyping });
   });
-  
-  // Handle disconnection
+
+  // --- Handle Disconnect ---
   socket.on('disconnect', () => {
-    console.log('Client disconnected');
-  });
-});
-
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-  socket.on('register-email', (email) => {
-    emailToSocketMap.set(email, socket.id);
-    console.log(`Registered email: ${email} with socket ID: ${socket.id}`);
-  });
-
-  socket.on('initiate-call', ({ toEmail, offer }) => {
-    const targetSocketId = emailToSocketMap.get(toEmail);
-    if (targetSocketId) {
-      io.to(targetSocketId).emit('incoming-call', { from: socket.id, offer });
+    // Remove from maps
+    const email = socketToEmailMap.get(socket.id);
+    if (email) {
+      emailToSocketMap.delete(email);
+      socketToEmailMap.delete(socket.id);
+      console.log(`User with email ${email} disconnected`);
     } else {
-      socket.emit('user-not-found', { email: toEmail });
-    }
-  });
-
-  socket.on('accept-call', ({ to, answer }) => {
-    console.log(`Call accepted by ${socket.id}, sending to ${to}`);
-    socket.to(to).emit('call-accepted', answer);
-  });
-
-  socket.on('candidate', ({ to, candidate }) => {
-    if (to) {
-      console.log(`ICE candidate from ${socket.id} to ${to}`);
-      socket.to(to).emit('candidate', candidate);
-    }
-  });
-
-  socket.on('end-call', ({ to }) => {
-    console.log(`Call ended by ${socket.id}`);
-    socket.to(to).emit('call-ended');
-  });
-
-  socket.on('disconnect', () => {
-    for (const [email, id] of emailToSocketMap.entries()) {
-      if (id === socket.id) {
-        emailToSocketMap.delete(email);
-        console.log(`User with email ${email} disconnected`);
-        break;
-      }
+      console.log('Client disconnected');
     }
   });
 });
-
-
 // Update your API routes for messages
 app.get('/api/workspaces/:workspaceName/channels/:channelId/messages', async (req, res) => {
   try {
