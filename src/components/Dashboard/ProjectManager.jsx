@@ -61,7 +61,7 @@ const handleAddProject = async (e) => {
 
   try {
     setLoading(true);
-    setError(null);5000
+    setError(null);
     const response = await fetch('https://icollab.onrender.com/api/projects', {
       method: 'POST',
       headers: {
