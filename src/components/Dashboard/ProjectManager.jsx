@@ -17,7 +17,7 @@ const ProjectManager = () => {
     const fetchProjects = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/workspaces/${workspaceId}/projects`);
+        const response = await fetch(`https://icollab.onrender.com/api/workspaces/${workspaceId}/projects`);
         const data = await response.json();
 
         const safeData = data.map((project) => ({
@@ -60,7 +60,7 @@ const ProjectManager = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('http://localhost:5000/api/projects', {
+      const response = await fetch('https://icollab.onrender.com/api/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ const ProjectManager = () => {
       const fetchProjects = async () => {
         try {
           setLoading(true);
-          const response = await fetch(`http://localhost:5000/api/workspaces/${workspaceId}/projects`);
+          const response = await fetch(`https://icollab.onrender.com/api/workspaces/${workspaceId}/projects`);
           const data = await response.json();
           const safeData = data.map((project) => ({
             ...project,
