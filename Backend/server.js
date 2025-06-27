@@ -1072,7 +1072,6 @@ app.post("/api/channels", async (req, res) => {
 //   });
 // });
 
-
 app.post('/api/projects', async (req, res) => {
   try {
     const { repositoryUrl, workspaceId, addedBy } = req.body;
@@ -1094,11 +1093,11 @@ app.post('/api/projects', async (req, res) => {
       return res.status(400).json({ message: 'Project already exists' });
     }
 
-    // Use your GitHub token directly here (replace with your actual token if you wish)
-    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    // --- TOKEN: Replace this with your actual token string if not using env ---
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN || 'YOUR_GITHUB_TOKEN_HERE';
     const headers = {
       Authorization: `token ${GITHUB_TOKEN}`,
-      'User-Agent': 'icollab-app' // GitHub requires a User-Agent header
+      'User-Agent': 'icollab-app'
     };
 
     // Fetch repository data from GitHub API
@@ -1129,7 +1128,7 @@ app.post('/api/projects', async (req, res) => {
       { headers }
     );
     const issues = issueResponse.data
-      .filter(issue => !issue.pull_request) // Filter out pull requests that appear in issues list
+      .filter(issue => !issue.pull_request)
       .map(issue => ({
         id: issue.id,
         title: issue.title,
@@ -1141,6 +1140,9 @@ app.post('/api/projects', async (req, res) => {
       }));
 
     const usera = await User.findOne({ email: addedBy });
+    if (!usera) {
+      return res.status(400).json({ message: 'User not found' });
+    }
     console.log('User', usera);
 
     // Create new project
