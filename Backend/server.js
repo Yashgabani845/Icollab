@@ -6,9 +6,7 @@ require('dotenv').config();
 const Workspace = require("./models/WorkSpace");
 const Project = require('./models/Project');
 const axios = require('axios');
-require('dotenv').config();
 const { Server } = require('socket.io');
-
 const User = require("./models/User")
 const TaskList = require('./models/TaskList');
 const http = require('http');
@@ -18,8 +16,6 @@ const Task = require('./models/Task');
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-require('dotenv').config();
-
 
 const URI = process.env.MONGO_URI || 'mongodb+srv://YashGabani:Yash9182@cluster0.n77u6.mongodb.net/Icollab?retryWrites=true&w=majority&appName=Cluster0';
 
@@ -35,21 +31,17 @@ const connectDB = async () => {
 
 connectDB();
 
-// const server = http.createServer(app);
-// const io = new Server(server, { cors: { origin: '*' } });
-// Add this to your server.js or index.js file
-const socketIo = require('socket.io');
 const emailToSocketMap = new Map();
 const socketToEmailMap = new Map();
 
 const app = express();
 const server = http.createServer(app);
 app.use(cors({
-  origin: ['https://icollab-eta.vercel.app', "http://localhost:3000"], // Your React app URL
+  origin: ['https://icollab-eta.vercel.app', "http://localhost:3000"],
   credentials: true
 }));
 
-const io = new socketIo.Server(server, {
+const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
@@ -62,9 +54,16 @@ io.on('connection', (socket) => {
 
   // --- Register Email for WebRTC Signaling ---
   socket.on('register-email', (email) => {
+    // Clean up any old mapping for this socket
+    for (const [oldEmail, id] of emailToSocketMap.entries()) {
+      if (id === socket.id && oldEmail !== email) {
+        emailToSocketMap.delete(oldEmail);
+      }
+    }
     emailToSocketMap.set(email, socket.id);
     socketToEmailMap.set(socket.id, email);
     console.log(`Registered email: ${email} with socket ID: ${socket.id}`);
+    console.log('Current emailToSocketMap:', Array.from(emailToSocketMap.entries()));
   });
 
   // --- WebRTC: Initiate Call (by email) ---
@@ -162,17 +161,19 @@ io.on('connection', (socket) => {
 
   // --- Handle Disconnect ---
   socket.on('disconnect', () => {
-    // Remove from maps
     const email = socketToEmailMap.get(socket.id);
     if (email) {
       emailToSocketMap.delete(email);
       socketToEmailMap.delete(socket.id);
       console.log(`User with email ${email} disconnected`);
+      console.log('Current emailToSocketMap:', Array.from(emailToSocketMap.entries()));
     } else {
       console.log('Client disconnected');
     }
   });
 });
+
+
 // Update your API routes for messages
 app.get('/api/workspaces/:workspaceName/channels/:channelId/messages', async (req, res) => {
   try {
