@@ -57,7 +57,6 @@ const VideoCall = () => {
       console.log('Call accepted, setting remote description');
       try {
         await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer));
-        // Add any queued ICE candidates
         for (const candidate of pendingCandidatesRef.current) {
           try {
             await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));

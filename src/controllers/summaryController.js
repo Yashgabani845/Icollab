@@ -1,32 +1,24 @@
 const Workspace = require("../models/Workspace");
 const { summarizeChat } = require("../utils/chatSummarizer");
 
-/**
- * Get a summary of recent chat messages for a specific channel
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 exports.getChannelSummary = async (req, res) => {
   try {
     const { workspaceName, channelId } = req.params;
-    const { timeframe = 24 } = req.query; // Default timeframe: 24 hours
+    const { timeframe = 24 } = req.query;
 
-    // Find the workspace and channel
     const workspace = await Workspace.findOne({ name: workspaceName });
     
     if (!workspace) {
       return res.status(404).json({ message: "Workspace not found" });
     }
 
-    // Find the channel in the workspace
     const channel = workspace.chat.channels.id(channelId);
     
     if (!channel) {
       return res.status(404).json({ message: "Channel not found" });
     }
 
-    // Get messages from the specified timeframe
-    const timeframeMs = parseInt(timeframe) * 60 * 60 * 1000; // Convert hours to milliseconds
+    const timeframeMs = parseInt(timeframe) * 60 * 60 * 1000; 
     const cutoffTime = new Date(Date.now() - timeframeMs);
     
     const recentMessages = channel.messages.filter(
@@ -41,7 +33,6 @@ exports.getChannelSummary = async (req, res) => {
       });
     }
 
-    // Generate summary using the helper function
     const summary = await summarizeChat(recentMessages);
 
     res.json({
@@ -56,11 +47,7 @@ exports.getChannelSummary = async (req, res) => {
   }
 };
 
-/**
- * Generate a summary for an array of messages
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+
 exports.generateSummary = async (req, res) => {
   try {
     const { messages } = req.body;
@@ -69,7 +56,6 @@ exports.generateSummary = async (req, res) => {
       return res.status(400).json({ message: "Valid messages array required" });
     }
 
-    // Generate summary
     const summary = await summarizeChat(messages);
     
     res.json({ summary, messageCount: messages.length });
